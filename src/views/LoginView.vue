@@ -20,23 +20,25 @@
                     </div>
                 </div>
 
-                <div class="col-12">
-                    <div class="p-inputgroup">
-                        <span class="p-inputgroup-addon">
-                            <i class="pi pi-server"></i>
-                        </span>
-                        <InputText :placeholder="$t('login.host')" v-model="loginData.host"
-                            v-tooltip.right="$t('login.defaultsTo') + ': localhost'" />
+                <div class="flex">
+                    <div class="col-9">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">
+                                <i class="pi pi-server"></i>
+                            </span>
+                            <InputText :placeholder="$t('login.host')" v-model="loginData.host"
+                                v-tooltip.right="$t('login.defaultsTo') + ': localhost'" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-12">
-                    <div class="p-inputgroup">
-                        <span class="p-inputgroup-addon">
-                            <i class="pi pi-sort-alt"></i>
-                        </span>
-                        <InputNumber :placeholder="$t('login.port')" v-model="loginData.port" mode="decimal" :use-grouping="false"
-                            v-tooltip.right="$t('login.defaultsTo') + ': 22'" />
+                    <div class="col-3">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">
+                                <i class="pi pi-sort-alt"></i>
+                            </span>
+                            <InputNumber :placeholder="$t('login.port')" v-model="loginData.port" mode="decimal" :use-grouping="false"
+                                v-tooltip.right="$t('login.defaultsTo') + ': 22'" />
+                        </div>
                     </div>
                 </div>
 
@@ -104,14 +106,13 @@
                 <InputText :placeholder="$t('login.displayName')" v-model="loginData.displayName" class="w-full mt-3" />
             </div>
 
-            <div class="mt-3">
+            <div class="mt-3" v-if="loginData.authType.value === 'password'">
                 <Checkbox v-model="savePassword" :binary="true" class="mr-1" />
                 {{ $t('login.savePassword') }} ?
             </div>
 
-            <div class="p-text-secondary" v-if="savePassword">
+            <div class="p-text-secondary" v-if="savePassword && loginData.authType.value === 'password'">
                 <p class="mb-0">
-                    
                     <b>{{ $t('login.passwordNote') }}</b>: {{ $t('login.passwordNoteText') }}
                 </p>
             </div>
@@ -194,34 +195,23 @@ export default {
     async mounted () {
         this.savedAccounts = localStorage.getItem('savedAccounts') ? JSON.parse(localStorage.getItem('savedAccounts')) : []
 
-        await SSHClient.GetConnection()
-        SSHClient.Execute('echo "Hello World"').then((result) => {
-            console.log(result)
-        })
+        // await SSHClient.GetConnection()
+        // SSHClient.Execute('echo "Hello World"').then((result) => {
+        //     console.log(result)
+        // })
 
-        console.log(await SSHClient.List('/var/www'))
+        // console.log(await SSHClient.List('/var/www'))
 
-        SSHClient.ReadFile('/var/www/test.txt').then((socket) => {
-            socket.on('data', (data) => {
-                console.log(data.toString())
-            })
-        })
+        // SSHClient.ReadFile('/var/www/test.txt').then((socket) => {
+        //     socket.on('data', (data) => {
+        //         console.log(data.toString())
+        //     })
+        // })
     },
 
     methods: {
         async Login() {
-            console.log('here')
-        },
-
-        MoreOptions() {
-            this.moreOptions.active = !this.moreOptions.active
-            if (this.moreOptions.active) {
-                this.moreOptions.icon = 'pi pi-angle-up'
-                this.moreOptions.text = this.$t('general.lessOptions')
-            } else {
-                this.moreOptions.icon = 'pi pi-angle-down'
-                this.moreOptions.text = this.$t('general.moreOptions')
-            }
+            this.PerformLogin(this.loginData)
         },
 
         SaveAccount() {
@@ -231,10 +221,10 @@ export default {
                 authType: this.loginData.authType,
                 username: this.loginData.username,
                 displayName: this.loginData.displayName,
-                savePassword: this.savePassword
+                savePassword: (this.loginData.authType.value === 'password') ? this.savePassword : false
             }
 
-            if (this.savePassword) {
+            if (this.savePassword && this.loginData.authType.value === 'password') {
                 data.password = this.loginData.password
             }
 
@@ -249,12 +239,25 @@ export default {
             localStorage.setItem('savedAccounts', JSON.stringify(this.savedAccounts))
         },
 
+        async PerformLogin(account) {
+            this.$loading.show()
+
+            this.error = ''
+
+            SSHClient.EstablishConnection(account)
+            .catch((error) => {
+                this.error = error
+            }).finally(() => {
+                this.$loading.hide()
+            })
+        },
+
         async LoadAccount() {
             this.selectedAccount = false
 
             let account = JSON.parse(JSON.stringify(this.savedAccounts[this.selectedAccountIndex]))
             
-            if (! account.savePassword) {
+            if (! account.savePassword && account.authType.value === 'password') {
                 account.password = this.selectedAccountPassword
             }
 
@@ -265,11 +268,17 @@ export default {
             this.selectedAccountIndex = index
             this.selectedAccountPassword = ''
 
+            if (this.savedAccounts[index].authType.value !== 'password') {
+                await this.LoadAccount()
+                return
+            }
+
             if (this.savedAccounts[index].savePassword) {
                 await this.LoadAccount()
-            } else {
-                this.selectedAccount = true
+                return
             }
+            
+            this.selectedAccount = true
         },
     },
 }

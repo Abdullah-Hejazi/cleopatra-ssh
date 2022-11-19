@@ -5,6 +5,8 @@ Instead of typing command in your terminal, you can interact with your SSH serve
 It also has a lot of tools such as text editors, image & video viewer, and a lot of other tools.
 
 ### Features Todo List:
+- [x] Login UI
+- [ ] Login with keys
 - [ ] Basic Desktop UI
 - [ ] Standard Desktop Folder Browser
 - [ ] File & Directory context menu

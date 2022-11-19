@@ -9,20 +9,19 @@ const environment = dotenv.config({
 let sshSession = null
 
 export default {
-    GetConnection: async () => {
-		console.log(environment)
-        if (sshSession === null) {
-            sshSession = new SSH2Promise({
-				host: environment.SSH_HOST,
-				port: 22,
-				username: environment.SSH_USER,
-				password: environment.SSH_PASSWORD
-			})
-
-            return await sshSession.connect()
+    EstablishConnection: async (account) => {
+        if (sshSession !== null) {
+            sshSession.close()
         }
 
-        return sshSession
+        sshSession = new SSH2Promise({
+			host: account.host,
+			port: account.port ?? 22,
+			username: account.username,
+			password: account.password
+		})
+
+		return await sshSession.connect()
     },
 
     Execute: async (command) => {

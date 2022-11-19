@@ -46,15 +46,6 @@ function createWindow() {
         win.loadURL('app://./index.html')
     }
 
-    win.on('close', function (event) {
-        if(! app.isQuiting){
-            event.preventDefault();
-            win.hide();
-        }
-    
-        return false;
-    });
-
     win.webContents.setWindowOpenHandler(function(e) {
         require('electron').shell.openExternal(e.url);
     });
@@ -82,33 +73,6 @@ app.on('ready', async () => {
     createWindow()
 })
 
-let appIcon = null
-app.whenReady().then(() => {
-    appIcon = new Tray(__dirname + '/favicon.ico')
-
-    const contextMenu = Menu.buildFromTemplate([
-        {
-            label: 'Open',
-            click: function () {
-                win.show()
-            }
-        },
-        {
-            label: 'Exit',
-            click: function () {
-                app.exit();
-            }
-        }
-    ])
-
-    appIcon.setToolTip('Cleopatra SSH')
-
-    appIcon.on('double-click', function () {
-        win.show()
-    })
-
-    appIcon.setContextMenu(contextMenu)
-})
 
 // open dialog
 ipcMain.on('open-file', function (event, path) {
