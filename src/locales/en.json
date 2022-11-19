@@ -1,0 +1,34 @@
+{
+    "general": {
+        "home": "Home",
+        "themes": "Themes",
+        "logout": "Logout",
+        "about": "About",
+        "save": "Save",
+        "cancel": "Cancel",
+        "lessOptions": "Less Options",
+        "moreOptions": "More Options",
+        "settings": "Settings",
+        "language": "Language",
+        "success": "Success",
+        "delete": "Delete"
+    },
+
+    "login": {
+        "title": "Login",
+        "username": "Username",
+        "password": "Password",
+        "host": "Host",
+        "port": "Port",
+        "login": "Login",
+        "saveAccount": "Save Account",
+        "defaultsTo": "Defaults to",
+        "displayName": "Display Name",
+        "savePassword": "Save Password",
+        "savedAccounts": "Saved Accounts",
+        "noSavedAccounts": "There are no saved accounts.",
+        "passwordNote": "Note",
+        "passwordNoteText": "storing passwords is generally not recommended, if you choose not to, you'll be prompt to enter the password on subsequent logins !",
+        "typePassword": "Type the password"
+    }
+}

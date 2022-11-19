@@ -1,0 +1,31 @@
+{
+    "general": {
+        "home": "الرئيسية",
+        "themes": "القوالب",
+        "logout": "تسجيل خروج",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "lessOptions": "خيارات أقل",
+        "moreOptions": "خيارات إضافية",
+        "settings": "الخيارات",
+        "language": "اللغة"
+    },
+
+    "login": {
+        "title": "تسجيل الدخول",
+        "username": "إسم المستخدم",
+        "password": "كلمة المرور",
+        "host": "الخادم",
+        "port": "المنفذ",
+        "login": "تسجيل الدخول",
+        "saveAccount": "حفظ الحساب",
+        "defaultsTo": "القيمة الإفتراضية",
+        "displayName": "إسم الحساب",
+        "savePassword": "حفظ كلمة المرور",
+        "savedAccounts": "الحسابات المحفوظة",
+        "noSavedAccounts": "لا يوجد حسابات محفوظة",
+        "passwordNote": "تنوية",
+        "passwordNoteText": "حفظ كلمة المرور ليس موصى به . إذا إخترت أن لا تحفظ كلمة المرور سيتم طلب إدخال كلمة المرور في كل تسجيل دخول",
+        "typePassword": "أدخل كلمة المرور"
+    }
+}
