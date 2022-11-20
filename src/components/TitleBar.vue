@@ -1,3 +1,26 @@
+<template>
+    <div class="title-bar surface-overlay px-1 flex justify-content-between">
+        <div class="flex align-items-center flex-grow-1">
+            <div class="flex align-items-center">
+                <img alt="logo" src="@/assets/logo2.png" height="34" class="mx-3">
+                <Button icon="pi pi-home" class="p-button-text p-button-plain" :label="$t('general.home')" @click="Home" />
+                <Button icon="pi pi-cog" class="p-button-plain p-button-text ml-1" :label="$t('general.settings')" @click="settings" />
+                <Button icon="pi pi-id-card" class="p-button-plain p-button-text ml-1" :label="$t('general.about')" @click="about" />
+                <Button icon="pi pi-power-off" class="p-button-plain p-button-text ml-1" :label="$t('general.logout')" @click="Logout" />
+            </div>
+            <div class="text-500 drag-bar flex-grow-1">
+                &nbsp;
+            </div>
+        </div>
+
+        <div class="flex align-items-center py-2">
+            <Button icon="pi pi-minus" class="p-button-text p-button-plain" @click="Minimize" />
+            <Button icon="pi pi-window-maximize" class="p-button-text p-button-plain" @click="Maximize" />
+            <Button icon="pi pi-times" class="p-button-text p-button-plain" @click="Close" />
+        </div>
+    </div>
+</template>
+
 <script>
 
 import { ipcRenderer } from "electron"
@@ -32,29 +55,6 @@ export default {
     }
 }
 </script>
-
-<template>
-    <div class="title-bar surface-overlay px-1 flex justify-content-between">
-        <div class="flex align-items-center flex-grow-1">
-            <div class="flex align-items-center">
-                <img alt="logo" src="@/assets/logo2.png" height="34" class="mx-3">
-                <Button icon="pi pi-home" class="p-button-text p-button-plain" :label="$t('general.home')" @click="Home" />
-                <Button icon="pi pi-cog" class="p-button-plain p-button-text ml-1" :label="$t('general.settings')" @click="settings" />
-                <Button icon="pi pi-id-card" class="p-button-plain p-button-text ml-1" :label="$t('general.about')" @click="about" />
-                <Button icon="pi pi-power-off" class="p-button-plain p-button-text ml-1" :label="$t('general.logout')" @click="Logout" />
-            </div>
-            <div class="text-500 drag-bar flex-grow-1">
-                &nbsp;
-            </div>
-        </div>
-
-        <div class="flex align-items-center py-2">
-            <Button icon="pi pi-minus" class="p-button-text p-button-plain" @click="Minimize" />
-            <Button icon="pi pi-window-maximize" class="p-button-text p-button-plain" @click="Maximize" />
-            <Button icon="pi pi-times" class="p-button-text p-button-plain" @click="Close" />
-        </div>
-    </div>
-</template>
 
 <style>
     .title-bar {

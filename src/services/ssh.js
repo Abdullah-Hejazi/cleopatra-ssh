@@ -1,12 +1,8 @@
 var SSH2Promise = require('ssh2-promise')
 const path = require('path')
-const dotenv = require('dotenv-defaults')
-
-const environment = dotenv.config({
-	path: path.resolve(__dirname, '../../../../../../.env')
-}).parsed
 
 let sshSession = null
+let sshUser = {}
 
 export default {
     EstablishConnection: async (account) => {
@@ -21,8 +17,25 @@ export default {
 			password: account.password
 		})
 
+		sshUser.host = account.host
+		sshUser.username = account.username
+
 		return await sshSession.connect()
     },
+
+	GetCurrentUser: () => {
+		return sshUser
+	},
+
+	GetConnection: () => {
+		return sshSession
+	},
+
+	CloseConnection: () => {
+		if (sshSession !== null) {
+			sshSession.close()
+		}
+	},
 
     Execute: async (command) => {
 		return sshSession.exec(command)

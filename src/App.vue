@@ -182,6 +182,7 @@ body {
     font-family: var(--font-family);
     font-weight: 400;
     color: var(--text-color);
+    margin: 0px;
 }
 
 .settings-dialog {
