@@ -33,7 +33,7 @@
                 <div>
                     <div class="text-lg">{{ account.displayName }}</div>
                     <div class="text-xs">
-                        {{ account.username }}@{{ account.host }}
+                        {{ account.username }}@{{ account.host }}<span class="text-gray-500">:{{ account.port }}</span>
                     </div>
                     <div class="text-xs text-gray-500 mt-1">
                         {{ authenticationType }} Authentication

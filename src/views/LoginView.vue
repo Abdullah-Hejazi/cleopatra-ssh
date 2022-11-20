@@ -245,6 +245,9 @@ export default {
             this.error = ''
 
             SSHClient.EstablishConnection(account)
+            .then(() => {
+                this.$router.push('/desktop')
+            })
             .catch((error) => {
                 this.error = error
             }).finally(() => {
