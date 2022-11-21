@@ -51,6 +51,7 @@
         "clear": "Clear",
         "copy": "Copy",
         "move": "Move",
-        "downloading": "Downloading"
+        "downloading": "Downloading",
+        "downloadfailed": "Download Failed"
     }
 }

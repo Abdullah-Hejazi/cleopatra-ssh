@@ -45,6 +45,10 @@ export default {
 		return await sshSession.sftp().readdir(file)
 	},
 
+	ListNested: async (file) => {
+		return await sshSession.exec('find ' + file + ' -printf "%y %P\n"')
+	},
+
 	ReadFile: async (file) => {
 		return sshSession.spawn("cat " + file)
 	},

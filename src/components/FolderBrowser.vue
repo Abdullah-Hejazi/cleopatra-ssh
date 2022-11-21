@@ -66,12 +66,14 @@
         </Dialog>
 
         <Dialog :header="$t('folder.downloading')" v-model:visible="download.visible" class="display-name-dialog" :modal="true">
-            <template v-for="downloadItem in download.items">
-                <div  class="my-2" v-if="downloadItem">
-                    <div class="mb-1">{{ downloadItem.name }}</div>
-                    <ProgressBar :value="downloadItem.value" :showValue="false" />
-                </div>
-            </template>
+            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;">
+                <template v-for="downloadItem in download.items">
+                    <div  class="my-2" v-if="downloadItem">
+                        <div class="mb-1">{{ downloadItem.name }}</div>
+                        <ProgressBar :value="downloadItem.value" :showValue="false" />
+                    </div>
+                </template>
+            </ScrollPanel>
         </Dialog>
     </Window>
 </template>
@@ -80,6 +82,7 @@
 import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
 const { ipcRenderer } = require('electron')
+var fs = require('fs');
 
 import Window from '@/components/Window'
 
@@ -229,7 +232,13 @@ export default {
             this.error = ''
 
             SSHClient.List(path).then((result) => {
-                this.files = Helpers.ParseDirectory(result)
+                this.files = Helpers.ParseDirectory(result).sort((a, b) => {
+                    if (a.directory && !b.directory)        return -1
+                    else if (!a.directory && b.directory)   return 1
+
+                    return 0
+                })
+
                 this.currentPath = path
                 this.UpdateSideBarItem()
             }).catch((err) => {
@@ -416,24 +425,74 @@ export default {
             if (! file) return
 
             this.selected.forEach(async (index) => {
-                let remotePath = this.currentPath + '/' + this.files[index].name
                 let localPath = file + '/' + this.files[index].name
 
-                this.download.visible = true
-
-                this.download.items[index] = {
-                    name: this.files[index].name,
-                    value: 0
+                if (this.files[index].directory) {
+                    this.DownloadDirectory(this.files[index].name, localPath)
+                } else {
+                    this.DownloadFile(this.files[index].name, localPath)
                 }
 
-                SSHClient.Download(remotePath, localPath, { step: (transferred, chunk, total) => {
-                    if (this.download.items[index])
-                        this.download.items[index].value = (transferred * 100) / total
-                }}).then(() => {
-                    delete this.download.items[index]
-                }).finally(() => {
-                    if (Object.keys(this.download.items).length === 0) this.download.visible = false
-                })
+                
+            })
+        },
+
+        DownloadFile (file, destination) {
+            let source = this.currentPath + '/' + file
+
+            let uid = Helpers.GetRandomString()
+
+            this.download.visible = true
+
+            this.download.items[uid] = {
+                name: file,
+                value: 0
+            }
+
+            SSHClient.Download(source, destination, {
+                step: (transferred, chunk, total) => {
+                    if (this.download.items[uid]) {
+                        this.download.items[uid].value = (transferred * 100) / total
+                    }
+                }
+            })
+            .catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.downloadfailed') + ': ' + source, detail: err, life: 6000});
+            })
+            .finally(() => {
+                delete this.download.items[uid]
+                if (Object.keys(this.download.items).length === 0) this.download.visible = false
+            })
+        },
+
+        async DownloadDirectory(directory, destination) {
+            let result = await SSHClient.ListNested(this.currentPath + '/' + directory)
+
+            if (! result) return
+
+            let files = result.split('\n').sort((a, b) => {
+                let isDirectoryA = a.substring(0, 1) === 'd'
+                let isDirectoryB = b.substring(0, 1) === 'd'
+
+                if (isDirectoryA && ! isDirectoryB) return -1
+                if (! isDirectoryA && isDirectoryB) return 1
+
+                return 0
+            })
+            
+            files.forEach((file) => {
+                let isDirectory = file.substring(0, 1) === 'd'
+                let filename = file.substring(2)
+
+                if (! filename) return
+
+                if (isDirectory) {
+                    if (! fs.existsSync(destination + '/' + filename)) {
+                        fs.mkdirSync(destination + '/' + filename, { recursive: true });
+                    }
+                } else {
+                    this.DownloadFile(directory + '/' + filename, destination + '/' + filename)
+                }
             })
         }
     }

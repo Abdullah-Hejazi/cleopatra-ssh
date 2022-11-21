@@ -120,7 +120,7 @@ export default {
 <template>
     <div>
         <ConfirmDialog />
-        <Toast />
+        <Toast position="bottom-left" />
 
         <TitleBar :settings="OpenSettings" :about="() => about = true" />
 

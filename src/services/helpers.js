@@ -1,4 +1,5 @@
 import SSHClient from '@/services/ssh'
+var uuid = require("uuid");
 
 export default {
 	GetHomeDirectory: () => {
@@ -18,5 +19,9 @@ export default {
             }
         })
 
+    },
+
+    GetRandomString: () => {
+        return uuid.v4()
     }
 }
