@@ -194,19 +194,6 @@ export default {
 
     async mounted () {
         this.savedAccounts = localStorage.getItem('savedAccounts') ? JSON.parse(localStorage.getItem('savedAccounts')) : []
-
-        // await SSHClient.GetConnection()
-        // SSHClient.Execute('echo "Hello World"').then((result) => {
-        //     console.log(result)
-        // })
-
-        // console.log(await SSHClient.List('/var/www'))
-
-        // SSHClient.ReadFile('/var/www/test.txt').then((socket) => {
-        //     socket.on('data', (data) => {
-        //         console.log(data.toString())
-        //     })
-        // })
     },
 
     methods: {

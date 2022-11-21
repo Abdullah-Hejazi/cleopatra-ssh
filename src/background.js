@@ -73,34 +73,10 @@ app.on('ready', async () => {
     createWindow()
 })
 
-
-// open dialog
-ipcMain.on('open-file', function (event, path) {
+// select folder dialog
+ipcMain.on('select-folder', function (event) {
     let result = dialog.showOpenDialogSync({
-        browserWindow: win,
-        properties: ['openFile'],
-        filters: [
-            {
-                name: 'Sql File',
-                extensions: ['sql']
-            }
-        ]
-    });
-
-    event.returnValue = result
-});
-
-// open save file dialog
-ipcMain.on('save-file', function (event, path) {
-    let result = dialog.showSaveDialogSync({
-        browserWindow: win,
-        properties: ['openFile'],
-        filters: [
-            {
-                name: 'Sql File',
-                extensions: ['sql']
-            }
-        ]
+        properties: ['openDirectory']
     });
 
     event.returnValue = result

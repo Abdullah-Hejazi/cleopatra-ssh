@@ -39,6 +39,7 @@ import Textarea from 'primevue/textarea';
 import Calendar from 'primevue/calendar';
 import ContextMenu from 'primevue/contextmenu';
 import FileUpload from 'primevue/fileupload';
+import ProgressBar from 'primevue/progressbar';
 
 
 import App from "./App.vue";
@@ -86,6 +87,7 @@ app.component('Textarea', Textarea);
 app.component('Calendar', Calendar);
 app.component('ContextMenu', ContextMenu);
 app.component('FileUpload', FileUpload);
+app.component('ProgressBar', ProgressBar);
 
 
 app.directive('Tooltip', Tooltip);

@@ -48,6 +48,9 @@
         "execute": "Execute",
         "download": "Download",
         "exists": "Error: File Already Exists",
-        "clear": "Clear"
+        "clear": "Clear",
+        "copy": "Copy",
+        "move": "Move",
+        "downloading": "Downloading"
     }
 }

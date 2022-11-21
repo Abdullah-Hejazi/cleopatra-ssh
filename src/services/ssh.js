@@ -59,5 +59,9 @@ export default {
 
 	CreateDirectory: async (file) => {
 		return sshSession.exec('mkdir ' + file)
+	},
+
+	Download: async (remotePath, localPath, options) => {
+		return sshSession.sftp().fastGet(remotePath, localPath, options)
 	}
 }

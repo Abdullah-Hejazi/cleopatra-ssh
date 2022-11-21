@@ -24,8 +24,8 @@
 
             <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length">
                 <ScrollPanel style="width: 100%; height: 100%">
-                    <div v-for="folder in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(folder)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
-                        <div @contextmenu="OnContextMenu($event, folder)" :class="'main-content-item-list ' + (folder.selected ? 'bg-primary' : '')" >
+                    <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
+                        <div @contextmenu="OnContextMenu($event, index)" :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
                             <i :class="(folder.directory) ? 'pi pi-folder' : 'pi pi-file'" style="font-size: 1rem"></i>
                             <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
                         </div>
@@ -34,6 +34,7 @@
 
                 <ContextMenu ref="foldermenu" :model="folderContextMenuItems" />
                 <ContextMenu ref="filemenu" :model="fileContextMenuItems" />
+                <ContextMenu ref="multimenu" :model="multiFileContextMenuItems" />
             </div>
 
             <div class="w-full text-center flex " v-if="loading">
@@ -63,12 +64,22 @@
                 </div>
             </template>
         </Dialog>
+
+        <Dialog :header="$t('folder.downloading')" v-model:visible="download.visible" class="display-name-dialog" :modal="true">
+            <template v-for="downloadItem in download.items">
+                <div  class="my-2" v-if="downloadItem">
+                    <div class="mb-1">{{ downloadItem.name }}</div>
+                    <ProgressBar :value="downloadItem.value" :showValue="false" />
+                </div>
+            </template>
+        </Dialog>
     </Window>
 </template>
 
 <script>
 import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
+const { ipcRenderer } = require('electron')
 
 import Window from '@/components/Window'
 
@@ -113,7 +124,21 @@ export default {
             folderContextMenuItems: [
                 {
 					label: this.$t('folder.open'),
-					icon: 'pi pi-folder-open'
+					icon: 'pi pi-folder-open',
+                    command: () => this.LoadItem(this.files[this.selected[0]])
+                },
+                {
+					label: this.$t('folder.copy'),
+					icon: 'pi pi-copy'
+                },
+                {
+					label: this.$t('folder.move'),
+					icon: 'pi pi-reply'
+                },
+                {
+					label: this.$t('folder.download'),
+					icon: 'pi pi-download',
+                    command: this.Download
                 },
                 {
 					label: this.$t('folder.rename'),
@@ -135,12 +160,21 @@ export default {
 					icon: 'pi pi-file'
                 },
                 {
+					label: this.$t('folder.copy'),
+					icon: 'pi pi-copy'
+                },
+                {
+					label: this.$t('folder.move'),
+					icon: 'pi pi-reply'
+                },
+                {
 					label: this.$t('folder.execute'),
 					icon: 'pi pi-dollar'
                 },
                 {
 					label: this.$t('folder.download'),
-					icon: 'pi pi-download'
+					icon: 'pi pi-download',
+                    command: this.Download
                 },
                 {
 					label: this.$t('folder.rename'),
@@ -154,7 +188,34 @@ export default {
 					label: this.$t('folder.properties'),
 					icon: 'pi pi-cog'
                 }
-            ]
+            ],
+
+            multiFileContextMenuItems: [
+                {
+					label: this.$t('folder.copy'),
+					icon: 'pi pi-copy'
+                },
+                {
+					label: this.$t('folder.move'),
+					icon: 'pi pi-reply'
+                },
+                {
+					label: this.$t('folder.download'),
+					icon: 'pi pi-download',
+                    command: this.Download
+                },
+                {
+					label: this.$t('folder.delete'),
+					icon: 'pi pi-trash'
+                }
+            ],
+
+            selected: [],
+
+            download: {
+                visible: false,
+                items: {}
+            }
         }
     },
 
@@ -203,12 +264,50 @@ export default {
             }
         },
 
-        SelectItem (item) {
-            this.files.forEach((file) => {
-                file.selected = false
-            })
+        SelectItem (index) {
+            if (window.event.ctrlKey) {
+                if (this.selected.includes(index)) {
+                    this.selected.splice(this.selected.indexOf(index), 1)
+                } else {
+                    this.selected.push(index)
+                }
+                return
+            }
 
-            item.selected = true
+            if (window.event.shiftKey) {
+                if (this.selected.length === 0) {
+                    this.selected.push(index)
+                    return
+                }
+
+                const lastSelected = this.selected[this.selected.length - 1]
+
+                if (lastSelected < index) {
+                    for (let i = lastSelected; i <= index; i++) {
+                        if (!this.selected.includes(i)) {
+                            this.selected.push(i)
+                        }
+                    }
+                } else {
+                    for (let i = lastSelected; i >= index; i--) {
+                        if (!this.selected.includes(i)) {
+                            this.selected.push(i)
+                        }
+                    }
+                }
+
+                return
+            }
+
+            this.selected = [index]
+        },
+
+        ClearSelected () {
+            this.selected = []
+        },
+
+        IsSelected (index) {
+            return this.selected.includes(index)
         },
 
         LoadItem (item) {
@@ -228,7 +327,7 @@ export default {
             
         },
 
-        GoBack() {
+        GoBack () {
             let path = this.currentPath
 
             if (path.endsWith('/')) {
@@ -281,7 +380,7 @@ export default {
             }
         },
 
-        ExecuteCreateFile(file) {
+        ExecuteCreateFile (file) {
             SSHClient.CreateFile(file).then(() => {
                 this.Load(this.currentPath)
             }).catch((err) => {
@@ -291,16 +390,51 @@ export default {
             })
         },
 
-        OnContextMenu(event, folder) {
-            this.SelectItem(folder)
+        OnContextMenu (event, index) {
+            if (! this.selected.includes(index)) {
+                this.ClearSelected()
+                this.SelectItem(index)
+            }
+
+            if (this.selected.length > 1) {
+                this.$refs.multimenu.show(event)
+                return
+            }
             
-            if (folder.directory) {
+            if (this.files[index].directory) {
                 this.$refs.filemenu.hide()
                 this.$refs.foldermenu.show(event)
             } else {
                 this.$refs.foldermenu.hide()
                 this.$refs.filemenu.show(event)
             }
+        },
+
+        Download () {
+            let file = ipcRenderer.sendSync('select-folder')
+
+            if (! file) return
+
+            this.selected.forEach(async (index) => {
+                let remotePath = this.currentPath + '/' + this.files[index].name
+                let localPath = file + '/' + this.files[index].name
+
+                this.download.visible = true
+
+                this.download.items[index] = {
+                    name: this.files[index].name,
+                    value: 0
+                }
+
+                SSHClient.Download(remotePath, localPath, { step: (transferred, chunk, total) => {
+                    if (this.download.items[index])
+                        this.download.items[index].value = (transferred * 100) / total
+                }}).then(() => {
+                    delete this.download.items[index]
+                }).finally(() => {
+                    if (Object.keys(this.download.items).length === 0) this.download.visible = false
+                })
+            })
         }
     }
 }
