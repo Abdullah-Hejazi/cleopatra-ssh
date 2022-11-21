@@ -52,6 +52,11 @@
         "copy": "Copy",
         "move": "Move",
         "downloading": "Downloading",
-        "downloadfailed": "Download Failed"
+        "downloadfailed": "Download Failed",
+        "upload": "Upload",
+        "uploadfile": "Upload Files",
+        "uploadfolder": "Upload Directories",
+        "uploading": "Uploading",
+        "uploadfailed": "Upload Failed"
     }
 }

@@ -67,5 +67,9 @@ export default {
 
 	Download: async (remotePath, localPath, options) => {
 		return sshSession.sftp().fastGet(remotePath, localPath, options)
+	},
+
+	Upload: async (localPath, remotePath, options) => {
+		return sshSession.sftp().fastPut(localPath, remotePath, options)
 	}
 }

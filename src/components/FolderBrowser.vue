@@ -8,11 +8,14 @@
                 </div>
 
                 <div class="path-controls p-0">
+                    <Button icon="pi pi-upload" class="mr-1 p-button-text" @click="UploadContextMenu" v-tooltip.bottom="$t('folder.upload')"></Button>
                     <Button icon="pi pi-plus" class="mr-1 p-button-text" @click="NewFile" v-tooltip.bottom="$t('folder.newfile')"></Button>
                     <Button icon="pi pi-refresh" class="mr-1 p-button-text" @click="Load(currentPath)" v-tooltip.bottom="$t('folder.refresh')"></Button>
                 </div>
             </div>
         </div>
+
+        <ContextMenu ref="uploadmenu" :model="uploadContextMenuItems" />
 
         <div class="folder-browser-window flex unselectable-text">
             <div class="side-bar col-3">
@@ -75,14 +78,27 @@
                 </template>
             </ScrollPanel>
         </Dialog>
+
+        <Dialog :header="$t('folder.uploading')" v-model:visible="upload.visible" class="display-name-dialog" :modal="true">
+            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;">
+                <template v-for="uploadItem in upload.items">
+                    <div  class="my-2" v-if="uploadItem">
+                        <div class="mb-1">{{ uploadItem.name }}</div>
+                        <ProgressBar :value="uploadItem.value" :showValue="false" />
+                    </div>
+                </template>
+            </ScrollPanel>
+        </Dialog>
     </Window>
 </template>
 
 <script>
 import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
+
 const { ipcRenderer } = require('electron')
-var fs = require('fs');
+var fs = require('fs')
+var pathLib = require('path')
 
 import Window from '@/components/Window'
 
@@ -213,9 +229,27 @@ export default {
                 }
             ],
 
+            uploadContextMenuItems: [
+                {
+					label: this.$t('folder.uploadfolder'),
+					icon: 'pi pi-folder-open',
+                    command: () => this.Upload(true)
+                },
+                {
+					label: this.$t('folder.uploadfile'),
+					icon: 'pi pi-file',
+                    command: () => this.Upload(false)
+                },
+            ],
+
             selected: [],
 
             download: {
+                visible: false,
+                items: {}
+            },
+
+            upload: {
                 visible: false,
                 items: {}
             }
@@ -424,7 +458,7 @@ export default {
 
             if (! file) return
 
-            this.selected.forEach(async (index) => {
+            this.selected.forEach((index) => {
                 let localPath = file + '/' + this.files[index].name
 
                 if (this.files[index].directory) {
@@ -492,6 +526,63 @@ export default {
                     }
                 } else {
                     this.DownloadFile(directory + '/' + filename, destination + '/' + filename)
+                }
+            })
+        },
+
+        UploadContextMenu (event) {
+            this.$refs.uploadmenu.show(event)
+        },
+
+        Upload (directory) {
+            let files = null
+
+            if (directory) {
+                files = ipcRenderer.sendSync('select-multi-directory')
+            } else {
+                files = ipcRenderer.sendSync('select-multi-file')
+            }
+
+            if (! files) return
+
+            files.forEach((file) => {
+                let destination = pathLib.basename(file)
+
+                if (directory) {
+                    // this.UploadDirectory(file, destination)
+                } else {
+                    this.UploadFile(file, destination)
+                }
+            })
+        },
+
+        UploadFile (source, file) {
+            let destination = this.currentPath + '/' + file
+
+            let uid = Helpers.GetRandomString()
+
+            this.upload.visible = true
+
+            this.upload.items[uid] = {
+                name: file,
+                value: 0
+            }
+
+            SSHClient.Upload(source, destination, {
+                step: (transferred, chunk, total) => {
+                    if (this.upload.items[uid]) {
+                        this.upload.items[uid].value = (transferred * 100) / total
+                    }
+                }
+            })
+            .catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.uploadfailed') + ': ' + source, detail: err, life: 6000});
+            })
+            .finally(() => {
+                delete this.upload.items[uid]
+                if (Object.keys(this.upload.items).length === 0) {
+                    this.upload.visible = false
+                    this.Load(this.currentPath)
                 }
             })
         }

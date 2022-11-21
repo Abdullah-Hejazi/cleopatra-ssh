@@ -82,6 +82,24 @@ ipcMain.on('select-folder', function (event) {
     event.returnValue = result
 });
 
+// select-multi-file dialog
+ipcMain.on('select-multi-file', function (event) {
+    let result = dialog.showOpenDialogSync({
+        properties: ['openFile', 'multiSelections']
+    });
+
+    event.returnValue = result
+});
+
+// select-any dialog
+ipcMain.on('select-multi-directory', function (event) {
+    let result = dialog.showOpenDialogSync({
+        properties: ['openDirectory', 'multiSelections']
+    });
+
+    event.returnValue = result
+});
+
 
 ipcMain.on('minimize-app', function (event, path) {
     win.minimize();
