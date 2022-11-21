@@ -30,5 +30,24 @@
         "passwordNote": "Note",
         "passwordNoteText": "storing passwords is generally not recommended, if you choose not to, you'll be prompt to enter the password on subsequent logins !",
         "typePassword": "Type the password"
+    },
+
+    "folder": {
+        "browser": "Folder Browser",
+        "newfile": "New File",
+        "emptyfolder": "This Directory Is Empty",
+        "refresh": "Refresh",
+        "filename": "Name",
+        "create": "Create",
+        "directory": "Directory",
+        "open": "Open",
+        "delete": "Delete",
+        "rename": "Rename",
+        "edit": "Edit",
+        "properties": "Properties",
+        "execute": "Execute",
+        "download": "Download",
+        "exists": "Error: File Already Exists",
+        "clear": "Clear"
     }
 }

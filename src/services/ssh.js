@@ -47,5 +47,17 @@ export default {
 
 	ReadFile: async (file) => {
 		return sshSession.spawn("cat " + file)
+	},
+
+	CreateFile: async (file) => {
+		return sshSession.exec('touch ' + file)
+	},
+
+	FileExists: async (file) => {
+		return sshSession.exec('test -e ' + file + ' && echo 1 || echo 0')
+	},
+
+	CreateDirectory: async (file) => {
+		return sshSession.exec('mkdir ' + file)
 	}
 }

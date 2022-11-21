@@ -1,12 +1,16 @@
 <template>
-    <Window title="Folder Browser" icon="/folder.png">
+    <Window :title="$t('folder.browser')" icon="/folder.png">
         <div class="path-bar">
-            <div class="path">
-                <i class="pi pi-angle-right"></i>
-                <span v-for="(segment, index) in pathSegments" :key="segment">
-                    <span class="path-segment" v-if="index === 0" @click="Load('/')">/</span>
-                    <span class="path-segment" v-else>{{ segment }}</span>
-                </span>
+            <div class="path flex">
+                <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
+                <div class="flex-grow-1 p-0 mr-3">
+                    <InputText spellcheck="false" @focus="pathFocused = true" @blur="pathFocused = false" type="text" v-model="pathInput" class="path-input w-full" @change="Load(pathInput)" />
+                </div>
+
+                <div class="path-controls p-0">
+                    <Button icon="pi pi-plus" class="mr-1 p-button-text" @click="NewFile" v-tooltip.bottom="$t('folder.newfile')"></Button>
+                    <Button icon="pi pi-refresh" class="mr-1 p-button-text" @click="Load(currentPath)" v-tooltip.bottom="$t('folder.refresh')"></Button>
+                </div>
             </div>
         </div>
 
@@ -21,12 +25,15 @@
             <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length">
                 <ScrollPanel style="width: 100%; height: 100%">
                     <div v-for="folder in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(folder)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
-                        <div :class="'main-content-item-list ' + (folder.selected ? 'bg-primary' : '')" >
+                        <div @contextmenu="OnContextMenu($event, folder)" :class="'main-content-item-list ' + (folder.selected ? 'bg-primary' : '')" >
                             <i :class="(folder.directory) ? 'pi pi-folder' : 'pi pi-file'" style="font-size: 1rem"></i>
                             <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
                         </div>
                     </div>
                 </ScrollPanel>
+
+                <ContextMenu ref="foldermenu" :model="folderContextMenuItems" />
+                <ContextMenu ref="filemenu" :model="fileContextMenuItems" />
             </div>
 
             <div class="w-full text-center flex " v-if="loading">
@@ -34,13 +41,28 @@
             </div>
 
             <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error">
-                This Directory Is Empty
+                {{ $t('folder.emptyfolder') }}
             </div>
 
             <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="error">
-                {{ error }}
+                {{ error }} . <span class="text-primary cursor-pointer" @click="Load(currentPath)">{{ $t('folder.clear') }}</span>
             </div>
         </div>
+
+        <Dialog :header="$t('folder.newfile')" v-model:visible="newFile.visible" class="display-name-dialog" :modal="true">
+            <div class="p-text-secondary">
+                <InputText :placeholder="$t('folder.filename')" v-model="newFile.name" class="w-full mt-3" />
+
+                <Checkbox v-model="newFile.directory" :binary="true" class="mt-3" />
+                <span class="ml-2">{{ $t('folder.directory') }}</span>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-content-center">
+                    <Button :label="$t('folder.create')" @click="CreateFile" />
+                </div>
+            </template>
+        </Dialog>
     </Window>
 </template>
 
@@ -69,7 +91,7 @@ export default {
                 },
                 {
                     name: 'Root',
-                    icon: 'pi pi-folder',
+                    icon: 'pi pi-server',
                     path: '/',
                     selected: false
                 },
@@ -78,22 +100,66 @@ export default {
             currentPath: Helpers.GetHomeDirectory(),
 
             loading: false,
-            error: ''
+            error: '',
+            pathInput: Helpers.GetHomeDirectory(),
+            pathFocused: false,
+
+            newFile: {
+                visible: false,
+                name: '',
+                directory: false
+            },
+
+            folderContextMenuItems: [
+                {
+					label: this.$t('folder.open'),
+					icon: 'pi pi-folder-open'
+                },
+                {
+					label: this.$t('folder.rename'),
+					icon: 'pi pi-pencil'
+                },
+                {
+					label: this.$t('folder.delete'),
+					icon: 'pi pi-trash'
+                },
+                {
+					label: this.$t('folder.properties'),
+					icon: 'pi pi-cog'
+                }
+            ],
+
+            fileContextMenuItems: [
+                {
+					label: this.$t('folder.edit'),
+					icon: 'pi pi-file'
+                },
+                {
+					label: this.$t('folder.execute'),
+					icon: 'pi pi-dollar'
+                },
+                {
+					label: this.$t('folder.download'),
+					icon: 'pi pi-download'
+                },
+                {
+					label: this.$t('folder.rename'),
+					icon: 'pi pi-pencil'
+                },
+                {
+					label: this.$t('folder.delete'),
+					icon: 'pi pi-trash'
+                },
+                {
+					label: this.$t('folder.properties'),
+					icon: 'pi pi-cog'
+                }
+            ]
         }
     },
 
     mounted () {
         this.Load(Helpers.GetHomeDirectory())
-    },
-
-    computed: {
-        pathSegments() {
-            if (this.currentPath === '/') {
-                return ['/']
-            }
-
-            return this.currentPath.split('/')
-        }
     },
 
     methods: {
@@ -131,6 +197,10 @@ export default {
                     rootItem.selected = false
                 }
             })
+
+            if (this.pathFocused === false) {
+                this.pathInput = this.currentPath
+            }
         },
 
         SelectItem (item) {
@@ -156,6 +226,81 @@ export default {
                 }
             }
             
+        },
+
+        GoBack() {
+            let path = this.currentPath
+
+            if (path.endsWith('/')) {
+                path = path.substring(0, path.length - 1)
+            }
+
+            path = path.split('/')
+            path.pop()
+
+            if (path.length <= 1) {
+                path = '/'
+            } else {
+                path = path.join('/')
+            }
+
+            this.Load(path)
+        },
+
+        NewFile () {
+            this.newFile.name = ''
+            this.newFile.visible = true
+        },
+
+        CreateFile () {
+            if (this.newFile.name.length === 0) {
+                return
+            }
+
+            let file = this.currentPath + '/' + this.newFile.name
+
+            if (this.newFile.directory) {
+                SSHClient.CreateDirectory(file).then(() => {
+                    this.Load(this.currentPath)
+                }).catch((err) => {
+                    this.error = err
+                }).finally(() => {
+                    this.newFile.visible = false
+                })
+            } else {
+                SSHClient.FileExists(file).then((res) => {
+                    if (res == 1) {
+                        this.error = this.$t('folder.exists')
+                        this.newFile.visible = false
+                    } else {
+                        this.ExecuteCreateFile(file)
+                    }
+                }).catch((err) => {
+                    this.error = err
+                })
+            }
+        },
+
+        ExecuteCreateFile(file) {
+            SSHClient.CreateFile(file).then(() => {
+                this.Load(this.currentPath)
+            }).catch((err) => {
+                this.error = err
+            }).finally(() => {
+                this.newFile.visible = false
+            })
+        },
+
+        OnContextMenu(event, folder) {
+            this.SelectItem(folder)
+            
+            if (folder.directory) {
+                this.$refs.filemenu.hide()
+                this.$refs.foldermenu.show(event)
+            } else {
+                this.$refs.foldermenu.hide()
+                this.$refs.filemenu.show(event)
+            }
         }
     }
 }
@@ -167,7 +312,7 @@ export default {
     }
 
     .folder-browser-window {
-        height: calc(100% - 75px);
+        height: calc(100% - 85px);
     }
 
     .side-bar {
@@ -243,17 +388,9 @@ export default {
         padding-top: 5px;
     }
 
-    .path-segment {
-        display: inline-block;
-        padding: 5px 8px 5px 8px;
-        border-radius: 10px;
-        cursor: pointer;
-        background-color: rgba(255, 255, 255, 0.089);
-        transition: all 0.15s ease-in-out;
-        margin-right: 5px;
-    }
-
-    .path-segment:hover {
-        background-color: rgba(255, 255, 255, 0.055);
+    .path-input {
+        background-color: #00000049 !important;
+        color: white;
+        font-size: 1rem;
     }
 </style>

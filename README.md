@@ -15,3 +15,8 @@ It also has a lot of tools such as text editors, image & video viewer, and a lot
 - [ ] Multiple terminals
 - [ ] Text Editor
 - [ ] Code Editor with Syntax highlighting
+- [ ] Upload files
+- [ ] Upload an entire folder
+- [ ] Download files
+- [ ] Download an entire folder
+- [ ] Drag & drop uploads/downloads (maybe ?)

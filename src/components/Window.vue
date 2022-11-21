@@ -190,8 +190,8 @@ export default {
 <style>
     .window {
         position: absolute;
-        width: 600px;
-        height: 400px;
+        width: 720px;
+        height: 440px;
 
         background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.2));
         backdrop-filter: blur(10px);
