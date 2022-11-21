@@ -7,9 +7,10 @@ It also has a lot of tools such as text editors, image & video viewer, and a lot
 ### Features Todo List:
 - [x] Login UI
 - [ ] Login with keys
-- [ ] Basic Desktop UI
-- [ ] Standard Desktop Folder Browser
+- [x] Basic Desktop UI
+- [x] Standard Desktop Folder Browser
 - [ ] File & Directory context menu
+- [ ] Desktop Window Manager
 - [ ] Terminal inside the desktop
 - [ ] Multiple terminals
 - [ ] Text Editor

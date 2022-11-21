@@ -54,13 +54,13 @@ export default {
             maximized: false,
 
             size: {
-                width: 600,
+                width: 720,
                 height: 400,
                 unit: 'px'
             },
 
             previousSize: {
-                width: 600,
+                width: 720,
                 height: 400,
                 unit: 'px'
             }

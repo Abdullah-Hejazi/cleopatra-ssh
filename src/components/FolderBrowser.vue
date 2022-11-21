@@ -1,15 +1,24 @@
 <template>
     <Window title="Folder Browser" icon="/folder.png">
-        <div class="path-bar"></div>
-        <div class="folder-browser-window flex">
+        <div class="path-bar">
+            <div class="path">
+                <i class="pi pi-angle-right"></i>
+                <span v-for="(segment, index) in pathSegments" :key="segment">
+                    <span class="path-segment" v-if="index === 0" @click="Load('/')">/</span>
+                    <span class="path-segment" v-else>{{ segment }}</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="folder-browser-window flex unselectable-text">
             <div class="side-bar col-3">
-                <div v-for="folder in root" :key="folder.name" :class="'side-bar-item ' + (folder.selected ? 'bg-primary' : '')" @click="SelectSideBarItem(folder)">
+                <div v-for="folder in root" :key="folder.name" :class="'side-bar-item pl-2 ' + (folder.selected ? 'bg-primary' : '')" @click="SelectSideBarItem(folder)">
                     <i :class="folder.icon" style="font-size: 1rem"></i>
                     <span class="ml-2">{{ folder.name }}</span>
                 </div>
             </div>
 
-            <div class="main-content-list col-9 mr-2">
+            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length">
                 <ScrollPanel style="width: 100%; height: 100%">
                     <div v-for="folder in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(folder)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
                         <div :class="'main-content-item-list ' + (folder.selected ? 'bg-primary' : '')" >
@@ -18,6 +27,18 @@
                         </div>
                     </div>
                 </ScrollPanel>
+            </div>
+
+            <div class="w-full text-center flex " v-if="loading">
+                <ProgressSpinner class="h-full" />
+            </div>
+
+            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error">
+                This Directory Is Empty
+            </div>
+
+            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="error">
+                {{ error }}
             </div>
         </div>
     </Window>
@@ -56,7 +77,8 @@ export default {
 
             currentPath: Helpers.GetHomeDirectory(),
 
-            loading: false
+            loading: false,
+            error: ''
         }
     },
 
@@ -64,18 +86,31 @@ export default {
         this.Load(Helpers.GetHomeDirectory())
     },
 
+    computed: {
+        pathSegments() {
+            if (this.currentPath === '/') {
+                return ['/']
+            }
+
+            return this.currentPath.split('/')
+        }
+    },
+
     methods: {
         Load (path) {
             this.loading = true
+            this.error = ''
 
             SSHClient.List(path).then((result) => {
                 this.files = Helpers.ParseDirectory(result)
                 this.currentPath = path
+                this.UpdateSideBarItem()
             }).catch((err) => {
-                console.log(err)
+                this.error = err
             }).finally(() => {
                 this.loading = false
             })
+
         },
 
         SelectSideBarItem (item) {
@@ -86,6 +121,16 @@ export default {
             item.selected = true
 
             this.Load(item.path)
+        },
+
+        UpdateSideBarItem () {
+            this.root.forEach((rootItem) => {
+                if (rootItem.path === this.currentPath) {
+                    rootItem.selected = true
+                } else {
+                    rootItem.selected = false
+                }
+            })
         },
 
         SelectItem (item) {
@@ -117,8 +162,12 @@ export default {
 </script>
 
 <style>
+    .unselectable-text {
+        user-select: none;
+    }
+
     .folder-browser-window {
-        height: calc(100% - 40px);
+        height: calc(100% - 75px);
     }
 
     .side-bar {
@@ -187,6 +236,24 @@ export default {
     }
 
     .main-content-item-list:hover {
+        background-color: rgba(255, 255, 255, 0.055);
+    }
+
+    .path-bar {
+        padding-top: 5px;
+    }
+
+    .path-segment {
+        display: inline-block;
+        padding: 5px 8px 5px 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.089);
+        transition: all 0.15s ease-in-out;
+        margin-right: 5px;
+    }
+
+    .path-segment:hover {
         background-color: rgba(255, 255, 255, 0.055);
     }
 </style>
