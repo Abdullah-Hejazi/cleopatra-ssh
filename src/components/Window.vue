@@ -2,13 +2,18 @@
     <div class="window" :style="windowStyle">
         <div class="window-title-bar flex justify-content-between">
             <div class="window-title-bar-text flex-grow-1" @mousedown="OnRePositionMouseDown" @mouseup="OnRePositionMouseUp">
-                {{ title }}
+                <img :src="icon" class="window-title-bar-icon" />
+                <span class="m-2">{{ title }}</span>
             </div>
             <div class="window-title-bar-controls flex">
                 <div class="window-title-bar-control bg-yellow-500 hover:bg-yellow-400" />
                 <div class="window-title-bar-control bg-green-500 hover:bg-green-400" @click="Maximize" />
                 <div class="window-title-bar-control bg-red-500 hover:bg-red-400" />
             </div>
+        </div>
+
+        <div class="window-content">
+            <slot />
         </div>
 
         <div class="window-resize-control" @mousedown="OnReSizeMouseDown" @mouseup="OnReSizeMouseUp" />
@@ -21,7 +26,8 @@ export default {
     name: 'Window',
 
     props: [
-        'title'
+        'title',
+        'icon'
     ],
 
     data () {
@@ -57,14 +63,7 @@ export default {
                 width: 600,
                 height: 400,
                 unit: 'px'
-            },
-
-            items: [
-                {
-					label:'Quit',
-					icon:'pi pi-fw pi-power-off'
-                }
-            ]
+            }
         }
     },
 
@@ -211,10 +210,17 @@ export default {
         border-top-right-radius: 10px;
     }
 
-    .window-title-bar-text {
-        margin-left: 20px;
+    .window-title-bar-icon {
+        width: 20px;
+        height: 20px;
         position: relative;
-        top: 9px;
+        top: 4px;
+    }
+
+    .window-title-bar-text {
+        margin-left: 12px;
+        position: relative;
+        top: 5px;
         cursor: grab;
     }
 
@@ -239,5 +245,9 @@ export default {
         width: 25px;
         height: 25px;
         cursor: nwse-resize;
+    }
+
+    .window-content {
+        height: 100%;
     }
 </style>

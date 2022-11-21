@@ -1,8 +1,8 @@
 <template>
     <div class="desktop-background flex align-content-end flex-wrap justify-content-center">
-        <Window title="Folder Browser" />
+        <FolderBrowser />
 
-        <div class="">
+        <div>
             <TaskBar />
         </div>
     </div>
@@ -10,14 +10,14 @@
 
 <script>
 import TaskBar from '@/components/TaskBar'
-import Window from '@/components/Window'
+import FolderBrowser from '@/components/FolderBrowser'
 
 export default {
     name: 'DesktopView',
 
     components: {
         TaskBar,
-        Window
+        FolderBrowser
     },
 
     methods: {}
@@ -27,7 +27,7 @@ export default {
 
 <style>
     .desktop-background {
-        background-image: url('https://images.unsplash.com/photo-1614850716626-873413eb7c1b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80');
+        background-image: url("/src/assets/background.jpg");
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
