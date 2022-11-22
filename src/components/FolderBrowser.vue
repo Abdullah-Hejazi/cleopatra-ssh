@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length">
+            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length" @contextmenu="Options">
                 <ScrollPanel style="width: 100%; height: 100%">
                     <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
                         <div @contextmenu="OnContextMenu($event, index)" :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
@@ -105,6 +105,60 @@
             <template #footer>
                 <div class="flex justify-content-center">
                     <Button :label="$t('folder.rename')" @click="Rename" />
+                </div>
+            </template>
+        </Dialog>
+
+        <Dialog :header="$t('folder.chmod')" v-model:visible="permissions.visible" class="display-name-dialog" :modal="true">
+            <div>
+                <div :class="'text-center text-lg py-2 px-3 border-round surface-section mb-4 ' + ((selected.length > 1) ? 'text-primary' : '')">
+                    {{ permissions.name}}
+                </div>
+
+                <table class="text-center mb-3">
+                    <thead>
+                        <tr>
+                            <th> </th>
+                            <th class="px-3 pb-2">{{ $t('folder.owner') }}</th>
+                            <th class="px-3 pb-2">{{ $t('folder.group') }}</th>
+                            <th class="px-3 pb-2">{{ $t('folder.other') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-bold pb-2">{{ $t('folder.read') }}</td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][0]" :binary="true" /></td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][1]" :binary="true" /></td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][2]" :binary="true" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold pb-2">{{ $t('folder.write') }}</td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][0]" :binary="true" /></td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][1]" :binary="true" /></td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][2]" :binary="true" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold pb-2">{{ $t('folder.exec') }}</td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][0]" :binary="true" /></td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][1]" :binary="true" /></td>
+                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][2]" :binary="true" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="text-center text-5xl">
+                    {{ permissions.value }}
+                </div>
+
+                <div class="text-center text-secondary mt-4">
+                    <Checkbox v-model="permissions.recursive" :binary="true" />
+                    <span class="text-bold ml-2">{{ $t('folder.recursive') }}</span>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-content-center">
+                    <Button :label="$t('folder.chmod')" @click="ChangePermissionsConfirm" />
                 </div>
             </template>
         </Dialog>
@@ -198,7 +252,8 @@ export default {
                 },
                 {
 					label: this.$t('folder.permissions'),
-					icon: 'pi pi-cog'
+					icon: 'pi pi-cog',
+                    command: this.ChangePermissionsDialog
                 }
             ],
 
@@ -244,11 +299,20 @@ export default {
                 },
                 {
 					label: this.$t('folder.permissions'),
-					icon: 'pi pi-cog'
+					icon: 'pi pi-cog',
+                    command: this.ChangePermissionsDialog
                 }
             ],
 
             multiFileContextMenuItems: [
+                {
+					label: this.$t('folder.download'),
+					icon: 'pi pi-download',
+                    command: this.Download
+                },
+                {
+                    separator: true
+                },
                 {
 					label: this.$t('folder.copy'),
 					icon: 'pi pi-copy',
@@ -260,14 +324,17 @@ export default {
                     command: this.Cut
                 },
                 {
-					label: this.$t('folder.download'),
-					icon: 'pi pi-download',
-                    command: this.Download
+                    separator: true
                 },
                 {
 					label: this.$t('folder.delete'),
 					icon: 'pi pi-trash',
                     command: this.DeleteConfirm
+                },
+                {
+					label: this.$t('folder.permissions'),
+					icon: 'pi pi-cog',
+                    command: this.ChangePermissionsDialog
                 }
             ],
 
@@ -317,6 +384,18 @@ export default {
                 items: {}
             },
 
+            permissions: {
+                visible: false,
+                items: [
+                    [false, false, false],
+                    [false, false, false],
+                    [false, false, false]
+                ],
+                value: '0 0 0',
+                name: 'test',
+                recursive: false
+            },
+
             rename: {
                 visible: false,
                 name: '',
@@ -325,7 +404,8 @@ export default {
 
             copying: 0,
             deleting: 0,
-            moving: 0
+            moving: 0,
+            changingPermissions: 0
         }
     },
 
@@ -509,6 +589,8 @@ export default {
         },
 
         OnContextMenu (event, index) {
+            this.$refs.optionsmenu.hide()
+            
             if (! this.selected.includes(index)) {
                 this.ClearSelected()
                 this.SelectItem(index)
@@ -736,6 +818,12 @@ export default {
         },
 
         Options (event) {
+            this.$refs?.filemenu?.hide()
+            this.$refs?.foldermenu?.hide()
+            this.$refs?.multimenu?.hide()
+
+            this.selected = []
+
             this.$refs.optionsmenu.show(event)
         },
 
@@ -835,7 +923,65 @@ export default {
                     this.CutFile(clipBoardData, file)
                 }
             })
-        }
+        },
+
+        ChangePermissionsDialog () {
+            if (this.selected.length === 0) return
+
+            if (this.selected.length === 1) {
+                this.permissions.name = this.files[this.selected[0]].name
+
+                this.permissions.items = Helpers.PermissionFromString(this.files[this.selected[0]].permissions)
+            } else {
+                this.permissions.name = this.selected.length + this.$t('folder.files')
+                this.permissions.items = [
+                    [false, false, false],
+                    [false, false, false],
+                    [false, false, false]
+                ]
+            }
+
+            this.OnPermissionCheckboxChange()
+
+            this.permissions.visible = true
+        },
+
+        OnPermissionCheckboxChange () {
+            let p = Helpers.PermissionFromArray(this.permissions.items)
+
+            this.permissions.value = p[0] + ' ' + p[1] + ' ' + p[2]
+        },
+
+        ChangePermissionsConfirm () {
+            this.$confirm.require({
+                message: this.$t('folder.changepermissionconfirmtext') + this.selected.length + this.$t('folder.files') + this.$t('folder.to') + '(' + this.permissions.value + ')',
+                header: this.$t('folder.changepermissionconfirm'),
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    this.ChangePermissions()
+                }
+            })
+        },
+
+        ChangePermissions () {
+            this.changingPermissions = this.selected.length
+
+            this.selected.forEach((index) => {
+                let file = this.files[index].name
+
+                SSHClient.ChangePermissions(this.currentPath + '/' + file, Helpers.PermissionFromArray(this.permissions.items), this.permissions.recursive)
+                .catch((err) => {
+                    this.$toast.add({severity:'error', summary: this.$t('folder.changepermissionfailed') + ': ' + file, detail: err, life: 6000});
+                }).finally(() => {
+                    this.changingPermissions--
+
+                    if (this.changingPermissions === 0) {
+                        this.Load(this.currentPath)
+                        this.permissions.visible = false
+                    }
+                })
+            })
+        },
     }
 }
 </script>

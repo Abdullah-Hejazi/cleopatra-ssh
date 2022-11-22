@@ -60,7 +60,6 @@
         "uploadfailed": "Upload Failed",
         "uploaded": "Upload Successful",
         "downloaded": "Download Successful",
-        "rename": "Rename",
         "renamefailed": "Rename Failed",
         "deleteconfirmtitle": "Confirm Deletion",
         "deleteconfirmtext": "Are you sure you want to delete ",
@@ -72,6 +71,19 @@
         "clipboardsamedir": "Cannot copy to the same directory",
         "clipboardempty": "Nothing to paste",
         "copyfailed": "Copy Failed",
-        "cutfailed": "Cut Failed"
+        "cutfailed": "Cut Failed",
+        "read": "Read",
+        "write": "Write",
+        "exec": "Execute",
+        "chmod": "Change Permissions",
+        "owner": "Owner",
+        "group": "Group",
+        "other": "Other",
+        "files": " Files",
+        "changepermissionconfirm": "Change Permissions",
+        "changepermissionconfirmtext": "Are you sure you want to change the permissions of ",
+        "to": " to ",
+        "recursive": "Recurse into subdirectories ?",
+        "changepermissionfailed": "Change Permissions Failed"
     }
 }

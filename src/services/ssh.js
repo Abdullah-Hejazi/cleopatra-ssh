@@ -86,5 +86,9 @@ export default {
 
 	Delete: async (file) => {
 		return sshSession.exec('rm -rdf ' + file)
+	},
+
+	ChangePermissions: async (file, permissions, recursive) => {
+		return sshSession.exec('chmod ' + (recursive ? '-R ' : '') + permissions + ' ' + file)
 	}
 }
