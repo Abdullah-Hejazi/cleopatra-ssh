@@ -77,6 +77,13 @@ export default {
 		return sshSession.exec('mv ' + oldPath + ' ' + newPath)
 	},
 
+	Copy: async (oldPath, newPath, directory) => {
+		if (directory)
+			return sshSession.exec('cp -r ' + oldPath + ' ' + newPath)
+			
+		return sshSession.exec('cp ' + oldPath + ' ' + newPath)
+	},
+
 	Delete: async (file) => {
 		return sshSession.exec('rm -rdf ' + file)
 	}

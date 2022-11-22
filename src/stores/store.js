@@ -2,7 +2,7 @@ import { createStore } from 'vuex'
 
 const store = createStore({
     modules: {
-        //ssh: ssh
+        // datastore: datastore
     }
 })
 

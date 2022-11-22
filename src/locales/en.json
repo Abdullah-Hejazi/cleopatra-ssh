@@ -50,7 +50,7 @@
         "exists": "Error: File Already Exists",
         "clear": "Clear",
         "copy": "Copy",
-        "move": "Move",
+        "cut": "Cut",
         "downloading": "Downloading",
         "downloadfailed": "Download Failed",
         "upload": "Upload",
@@ -67,6 +67,11 @@
         "deletefiles": " files ?",
         "deletefailed": "Delete Failed",
         "options": "Options",
-        "paste": "Paste"
+        "paste": "Paste",
+        "pasteerror": "Copy Error",
+        "clipboardsamedir": "Cannot copy to the same directory",
+        "clipboardempty": "Nothing to paste",
+        "copyfailed": "Copy Failed",
+        "cutfailed": "Cut Failed"
     }
 }

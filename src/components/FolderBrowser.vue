@@ -114,6 +114,7 @@
 <script>
 import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
+import Clipboard from '@/services/clipboard'
 
 const { ipcRenderer } = require('electron')
 var pathLib = require('path')
@@ -165,17 +166,25 @@ export default {
                     command: () => this.LoadItem(this.files[this.selected[0]])
                 },
                 {
-					label: this.$t('folder.copy'),
-					icon: 'pi pi-copy'
-                },
-                {
-					label: this.$t('folder.move'),
-					icon: 'pi pi-reply'
-                },
-                {
 					label: this.$t('folder.download'),
 					icon: 'pi pi-download',
                     command: this.Download
+                },
+                {
+                    separator: true
+                },
+                {
+					label: this.$t('folder.copy'),
+					icon: 'pi pi-copy',
+                    command: this.Copy
+                },
+                {
+					label: this.$t('folder.cut'),
+					icon: 'pi pi-clone',
+                    command: this.Cut
+                },
+                {
+                    separator: true
                 },
                 {
 					label: this.$t('folder.rename'),
@@ -199,21 +208,29 @@ export default {
 					icon: 'pi pi-file'
                 },
                 {
-					label: this.$t('folder.copy'),
-					icon: 'pi pi-copy'
-                },
-                {
-					label: this.$t('folder.move'),
-					icon: 'pi pi-reply'
+					label: this.$t('folder.download'),
+					icon: 'pi pi-download',
+                    command: this.Download
                 },
                 {
 					label: this.$t('folder.execute'),
 					icon: 'pi pi-dollar'
                 },
                 {
-					label: this.$t('folder.download'),
-					icon: 'pi pi-download',
-                    command: this.Download
+                    separator: true
+                },
+                {
+					label: this.$t('folder.copy'),
+					icon: 'pi pi-copy',
+                    command: this.Copy
+                },
+                {
+					label: this.$t('folder.cut'),
+					icon: 'pi pi-clone',
+                    command: this.Cut
+                },
+                {
+                    separator: true
                 },
                 {
 					label: this.$t('folder.rename'),
@@ -234,11 +251,13 @@ export default {
             multiFileContextMenuItems: [
                 {
 					label: this.$t('folder.copy'),
-					icon: 'pi pi-copy'
+					icon: 'pi pi-copy',
+                    command: this.Copy
                 },
                 {
-					label: this.$t('folder.move'),
-					icon: 'pi pi-reply'
+					label: this.$t('folder.cut'),
+					icon: 'pi pi-clone',
+                    command: this.Cut
                 },
                 {
 					label: this.$t('folder.download'),
@@ -302,7 +321,11 @@ export default {
                 visible: false,
                 name: '',
                 index: 0
-            }
+            },
+
+            copying: 0,
+            deleting: 0,
+            moving: 0
         }
     },
 
@@ -687,6 +710,7 @@ export default {
         },
 
         Delete () {
+            this.deleting = this.selected.length
             this.selected.forEach((index) => {
                 let file = this.files[index].name
 
@@ -695,15 +719,118 @@ export default {
         },
 
         DeleteFile(file) {
-            SSHClient.Delete(this.currentPath + '/' + file).then(() => {
-                this.Load(this.currentPath)
-            }).catch((err) => {
+            SSHClient.Delete(this.currentPath + '/' + file)
+            .catch((err) => {
                 this.$toast.add({severity:'error', summary: this.$t('folder.deletefailed') + ': ' + file, detail: err, life: 6000});
+            }).finally(() => {
+                this.deleting--
+
+                if (this.deleting === 0) {
+                    this.Load(this.currentPath)
+                }
             })
         },
 
         Options (event) {
             this.$refs.optionsmenu.show(event)
+        },
+
+        Copy () {
+            if (this.selected.length === 0) return
+
+            this.clipboardData = {
+                type: 'copy',
+                path: this.currentPath,
+                files: []
+            }
+            
+
+            this.selected.forEach((index) => {
+                let file = this.files[index]
+
+                this.clipboardData.files.push({
+                    name: file.name,
+                    directory: file.directory
+                })
+            })
+
+            Clipboard.Set(this.clipboardData)
+        },
+
+        CopyFile (clipBoardData, file) {
+            SSHClient.Copy(clipBoardData.path + '/' + file.name, this.currentPath + '/' + file.name, file.directory)
+            .catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.copyfailed') + ': ' + file.name, detail: err, life: 6000});
+            }).finally(() => {
+                this.copying--
+
+                if (this.copying === 0) {
+                    this.Load(this.currentPath)
+                }
+            })
+        },
+
+        Cut () {
+            if (this.selected.length === 0) return
+
+            this.clipboardData = {
+                type: 'cut',
+                path: this.currentPath,
+                files: []
+            }
+            
+
+            this.selected.forEach((index) => {
+                let file = this.files[index]
+
+                this.clipboardData.files.push({
+                    name: file.name,
+                    directory: file.directory
+                })
+            })
+
+            Clipboard.Set(this.clipboardData)
+        },
+
+        CutFile (clipBoardData, file) {
+            SSHClient.Move(clipBoardData.path + '/' + file.name, this.currentPath + '/' + file.name)
+            .catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.cutfailed') + ': ' + file.name, detail: err, life: 6000});
+            }).finally(() => {
+                this.moving--
+
+                if (this.moving === 0) {
+                    this.Load(this.currentPath)
+                }
+            })
+        },
+
+        Paste () {
+            let clipBoardData = Clipboard.Get()
+
+            if (Clipboard.IsEmpty()) {
+                this.$toast.add({severity:'error', summary: this.$t('folder.clipboardempty'), life: 6000});
+                return
+            }
+
+            if (clipBoardData.path === this.currentPath) {
+                this.$toast.add({severity:'error', summary: this.$t('folder.pasteerror'), detail: this.$t('folder.clipboardsamedir'), life: 6000});
+                return
+            }
+
+            if (clipBoardData.action === 'copy') {
+                this.copying = clipBoardData.files.length
+            } else {
+                this.moving = clipBoardData.files.length
+            }
+
+            clipBoardData.files.forEach((file) => {
+                if (clipBoardData.action === 'copy') {
+                    this.CopyFile(clipBoardData, file)
+                } else {
+                    this.CutFile(clipBoardData, file)
+                }
+            })
         }
     }
 }
