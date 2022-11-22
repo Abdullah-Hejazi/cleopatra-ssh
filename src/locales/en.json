@@ -85,5 +85,17 @@
         "to": " to ",
         "recursive": "Recurse into subdirectories ?",
         "changepermissionfailed": "Change Permissions Failed"
+    },
+
+    "editor": {
+        "title": "Text Editor",
+        "save": "Save",
+        "saveas": "Save As",
+        "savefailed": "Save Failed",
+        "saveconfirm": "File Saved",
+        "saveconfirmtext": " has been saved successfully.",
+        "file": "File: ",
+        "newfile": "New File"
+
     }
 }

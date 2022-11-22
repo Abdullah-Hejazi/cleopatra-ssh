@@ -10,6 +10,7 @@ It also has a lot of tools such as text editors, image & video viewer, and a lot
 - [x] Basic Desktop UI
 - [x] Standard Desktop Folder Browser
 - [x] File & Directory context menu
+- [ ] Copy Path
 - [ ] Desktop Window Manager
 - [ ] Terminal inside the desktop
 - [ ] Multiple terminals

@@ -27,7 +27,10 @@ export default {
 
     props: [
         'title',
-        'icon'
+        'icon',
+        'defaultSize',
+        'defaultLocation',
+        'defaultPosition'
     ],
 
     data () {
@@ -90,6 +93,36 @@ export default {
             this.OnRePositionMouseUp()
             this.OnReSizeMouseUp()
         })
+
+        if (this.defaultSize) {
+            this.size = {
+                width: this.defaultSize.width,
+                height: this.defaultSize.height,
+                widthUnit: 'px',
+                heightUnit: 'px',
+            }
+
+            this.previousSize = {
+                width: this.defaultSize.width,
+                height: this.defaultSize.height,
+                widthUnit: 'px',
+                heightUnit: 'px',
+            }
+        }
+
+        if (this.defaultLocation === 'center') {
+            this.position = {
+                top: (window.innerHeight / 2) - (this.size.height / 2),
+                left: (window.innerWidth / 2) - (this.size.width / 2)
+            }
+
+            this.previousPosition = this.position
+        } else {
+            if (this.defaultPosition) {
+                this.position = this.defaultPosition
+                this.previousPosition = this.defaultPosition
+            }
+        }
     },
 
     methods: {

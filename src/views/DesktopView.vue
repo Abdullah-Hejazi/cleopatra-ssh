@@ -1,7 +1,6 @@
 <template>
     <div class="desktop-background flex align-content-end flex-wrap justify-content-center">
-        <FolderBrowser />
-        <FolderBrowser />
+        <Editor />
 
         <div>
             <TaskBar />
@@ -11,14 +10,16 @@
 
 <script>
 import TaskBar from '@/components/TaskBar'
-import FolderBrowser from '@/components/FolderBrowser'
+import FolderBrowser from '@/components/windows/FolderBrowser'
+import Editor from '@/components/windows/Editor'
 
 export default {
     name: 'DesktopView',
 
     components: {
         TaskBar,
-        FolderBrowser
+        FolderBrowser,
+        Editor
     },
 
     methods: {}

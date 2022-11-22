@@ -1,5 +1,5 @@
 <template>
-    <Window :title="$t('folder.browser')" icon="/folder.png">
+    <Window :title="$t('folder.browser')" icon="/folder.png" :defaultSize="{width: 850, height: 500}">
         <div class="path-bar">
             <div class="path flex">
                 <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
@@ -173,7 +173,7 @@ import Clipboard from '@/services/clipboard'
 const { ipcRenderer } = require('electron')
 var pathLib = require('path')
 
-import Window from '@/components/Window'
+import Window from '@/components/windows/Window'
 
 export default {
     name: 'FolderBrowser',
