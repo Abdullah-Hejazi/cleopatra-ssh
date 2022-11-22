@@ -14,8 +14,13 @@
         </div>
 
         <div class="flex justify-content-center h-full">
-            <div class="text-editor" @contextmenu="Options" @keydown="OnKeyDown">
-                <PrismEditor @input="changed = true" :tabSize="4" class="text-area" v-model="text" :highlight="HighLight" lineNumbers />
+            <div class="editor-container flex" @contextmenu="Options">
+                <div class="line-numbers">
+                    <div v-for="_, index in text.split('\n')" :key="index" class="line-number">{{ index + 1}}</div>
+                </div>
+                <div class="editor flex-grow-1">
+                    <textarea ref="editor" spellcheck="false" class="text-editor w-full h-full" v-model="text" @input="onInput"></textarea>
+                </div>
             </div>
         </div>
     </Window>
@@ -26,16 +31,11 @@ import SSHClient from '@/services/ssh'
 
 import Window from '@/components/windows/Window'
 
-import { PrismEditor } from 'vue-prism-editor'
-import 'vue-prism-editor/dist/prismeditor.min.css'
-
-
 export default {
     name: 'Editor',
 
     components: {
-        Window,
-        PrismEditor
+        Window
     },
 
     props: {
@@ -76,6 +76,9 @@ export default {
             this.currentFile = this.file
             this.Read(this.currentFile)
         }
+
+        this.$refs.editor.focus()
+        this.$refs.editor.addEventListener('scroll', this.onScroll)
     },
 
     methods: {
@@ -99,10 +102,6 @@ export default {
             }
         },
 
-        HighLight (text) {
-            return '<div style="color: white;">' + text + '</div>'
-        },
-
         Options (event) {
             this.$refs.optionsmenu.toggle(event)
         },
@@ -122,7 +121,14 @@ export default {
             }).finally(() => {
                 this.loading = false
             })
-        }
+        },
+
+        onScroll (e) {
+            const editor = this.$refs.editor
+            const lineNumbers = this.$el.querySelector('.line-numbers')
+
+            lineNumbers.scrollTop = editor.scrollTop
+        },
     }
 }
 </script>
@@ -140,25 +146,11 @@ export default {
         width: 98%;
     }
 
-    .text-editor {
+    .editor-container {
         background-color: #0000008a !important;
         border-radius: 5px;
         width: 98%;
-        padding: 10px;
         height: calc(100% - 100px);
-    }
-
-    .prism-editor__container {
-        height: 100%;
-    }
-
-    .prism-editor__textarea {
-        height: 100%;
-        resize: vertical;
-    }
-
-    .prism-editor__textarea:focus {
-        outline: none;
     }
 
     .file-name {
@@ -166,7 +158,53 @@ export default {
         border-radius: 5px;
     }
 
-    .prism-editor__line-number {
-        color: #7a7a7a;
+    .line-numbers {
+        background-color: #00000049 !important;
+        border-radius: 5px;
+        width: 35px;
+        overflow: hidden;
+    }
+
+    .line-number {
+        margin-bottom: 4px;
+        text-align: center;
+        margin-top: 2px;
+        color: #6d6d6d;
+    }
+
+    .text-editor {
+        background-color: #00000049 !important;
+        border-radius: 5px;
+        border: none;
+        font-size: 1rem;
+        line-height: 25px;
+        white-space: nowrap;
+        resize: none;
+        scroll-padding: 50px 0 0 50px;
+    }
+
+    .text-editor:focus {
+        outline: none;
+    }
+
+    ::-webkit-scrollbar {
+        margin-top: 50px;
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #303030; 
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgb(87, 87, 87); 
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555; 
+    }
+
+    ::-webkit-resizer {
+        background-color: transparent !important;
     }
 </style>

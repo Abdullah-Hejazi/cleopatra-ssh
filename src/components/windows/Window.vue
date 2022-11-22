@@ -125,6 +125,12 @@ export default {
         }
     },
 
+    beforeDestroy () {
+        document.removeEventListener("mousemove", this.OnMouseMove)
+        document.removeEventListener("mouseup", this.OnRePositionMouseUp)
+        document.removeEventListener("mouseup", this.OnReSizeMouseUp)
+    },
+
     methods: {
         OnRePositionMouseDown() {
             if (this.maximized) return
