@@ -1,6 +1,7 @@
 <template>
     <div class="desktop-background flex align-content-end flex-wrap justify-content-center">
         <FolderBrowser />
+        <FolderBrowser />
 
         <div>
             <TaskBar />

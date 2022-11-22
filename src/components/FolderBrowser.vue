@@ -41,7 +41,7 @@
                 <ProgressSpinner class="h-full" />
             </div>
 
-            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error">
+            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error" @contextmenu="Options">
                 {{ $t('folder.emptyfolder') }}
             </div>
 
