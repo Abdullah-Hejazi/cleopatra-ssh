@@ -69,7 +69,7 @@
         </Dialog>
 
         <Dialog :header="$t('folder.downloading')" v-model:visible="download.visible" class="display-name-dialog" :modal="true">
-            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;">
+            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(download.items).length">
                 <template v-for="downloadItem in download.items">
                     <div  class="my-2" v-if="downloadItem">
                         <div class="mb-1">{{ downloadItem.name }}</div>
@@ -77,10 +77,15 @@
                     </div>
                 </template>
             </ScrollPanel>
+
+            <div class="p-5 text-center text-primary" v-else>
+                <div class="pi pi-check-circle" style="font-size: 3rem"></div>
+                <div class="mt-3">{{ $t('folder.downloaded') }}</div>
+            </div>
         </Dialog>
 
         <Dialog :header="$t('folder.uploading')" v-model:visible="upload.visible" class="display-name-dialog" :modal="true">
-            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;">
+            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(upload.items).length">
                 <template v-for="uploadItem in upload.items">
                     <div  class="my-2" v-if="uploadItem">
                         <div class="mb-1">{{ uploadItem.name }}</div>
@@ -88,6 +93,11 @@
                     </div>
                 </template>
             </ScrollPanel>
+
+            <div class="p-5 text-center text-primary" v-else>
+                <div class="pi pi-check-circle" style="font-size: 3rem"></div>
+                <div class="mt-3">{{ $t('folder.uploaded') }}</div>
+            </div>
         </Dialog>
     </Window>
 </template>
@@ -97,7 +107,6 @@ import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
 
 const { ipcRenderer } = require('electron')
-var fs = require('fs')
 var pathLib = require('path')
 
 import Window from '@/components/Window'
@@ -495,7 +504,6 @@ export default {
             })
             .finally(() => {
                 delete this.download.items[uid]
-                if (Object.keys(this.download.items).length === 0) this.download.visible = false
             })
         },
 
@@ -521,9 +529,7 @@ export default {
                 if (! filename) return
 
                 if (isDirectory) {
-                    if (! fs.existsSync(destination + '/' + filename)) {
-                        fs.mkdirSync(destination + '/' + filename, { recursive: true });
-                    }
+                    Helpers.MakeDirectory(destination + '/' + filename)
                 } else {
                     this.DownloadFile(directory + '/' + filename, destination + '/' + filename)
                 }
@@ -549,7 +555,7 @@ export default {
                 let destination = pathLib.basename(file)
 
                 if (directory) {
-                    // this.UploadDirectory(file, destination)
+                    this.UploadDirectory(Helpers.ListDirectory(file), destination)
                 } else {
                     this.UploadFile(file, destination)
                 }
@@ -580,10 +586,24 @@ export default {
             })
             .finally(() => {
                 delete this.upload.items[uid]
+
                 if (Object.keys(this.upload.items).length === 0) {
-                    this.upload.visible = false
                     this.Load(this.currentPath)
                 }
+            })
+        },
+
+        UploadDirectory (items, file) {
+            SSHClient.CreateDirectory(this.currentPath + '/' + file).then(() => {
+                items.forEach((item) => {
+                    if (item.directory) {
+                        this.UploadDirectory(item.items, file + '/' + item.name)
+                    } else {
+                        this.UploadFile(item.path, file + '/' + item.name)
+                    }
+                })
+            }).catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.uploadfailed') + ': ' + file, detail: err, life: 6000});
             })
         }
     }

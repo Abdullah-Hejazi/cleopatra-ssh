@@ -1,5 +1,7 @@
 import SSHClient from '@/services/ssh'
-var uuid = require("uuid");
+
+var uuid = require("uuid")
+var fs = require('fs')
 
 export default {
 	GetHomeDirectory: () => {
@@ -23,5 +25,27 @@ export default {
 
     GetRandomString: () => {
         return uuid.v4()
+    },
+
+    MakeDirectory: (dir) => {
+        if (! fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    },
+
+    ListDirectory: function (dir) {
+        let list = fs.readdirSync(dir, { withFileTypes: true })
+        let result = []
+
+        list.forEach((item) => {
+            result.push({
+                name: item.name,
+                directory: item.isDirectory(),
+                items: item.isDirectory() ? this.ListDirectory(dir + '/' + item.name) : [],
+                path: dir + '/' + item.name
+            })
+        })
+
+        return result
     }
 }

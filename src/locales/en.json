@@ -57,6 +57,8 @@
         "uploadfile": "Upload Files",
         "uploadfolder": "Upload Directories",
         "uploading": "Uploading",
-        "uploadfailed": "Upload Failed"
+        "uploadfailed": "Upload Failed",
+        "uploaded": "Upload Successful",
+        "downloaded": "Download Successful"
     }
 }
