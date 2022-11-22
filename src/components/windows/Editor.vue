@@ -15,11 +15,15 @@
 
         <div class="flex justify-content-center h-full">
             <div class="editor-container flex" @contextmenu="Options">
-                <div class="line-numbers">
+                <div class="w-full text-center flex " v-if="loading">
+                    <ProgressSpinner class="h-full" />
+                </div>
+
+                <div class="line-numbers" v-show="!loading">
                     <div v-for="_, index in text.split('\n')" :key="index" class="line-number">{{ index + 1}}</div>
                 </div>
-                <div class="editor flex-grow-1">
-                    <textarea ref="editor" spellcheck="false" class="text-editor w-full h-full" v-model="text" @input="onInput"></textarea>
+                <div class="editor flex-grow-1" v-show="!loading">
+                    <textarea ref="editor" spellcheck="false" class="text-editor w-full h-full" v-model="text" @keyup="OnKeyUp"></textarea>
                 </div>
             </div>
         </div>
@@ -50,7 +54,6 @@ export default {
             text: '',
 
             loading: true,
-            error: '',
 
             currentFile: '',
 
@@ -62,44 +65,42 @@ export default {
                 },
                 {
                     label: this.$t('editor.saveas'),
-                    icon: 'pi pi-clone'
+                    icon: 'pi pi-clone',
+                    command: this.SaveAs
                 }
             ],
 
             changed: false
-
         }
     },
 
     mounted () {
         if (this.file) {
-            this.currentFile = this.file
-            this.Read(this.currentFile)
+            this.Read(this.file)
         }
 
-        this.$refs.editor.focus()
-        this.$refs.editor.addEventListener('scroll', this.onScroll)
+        this.loading = false
+        this.$refs.editor.addEventListener('scroll', this.OnScroll)
+    },
+
+    beforeDestroy () {
+        this.$refs.editor.removeEventListener('scroll', this.OnScroll)
     },
 
     methods: {
         Read (path) {
             this.loading = true
-            this.error = ''
 
             SSHClient.ReadFile(path).then((result) => {
+                this.currentFile = path
                 this.text = result
             }).catch((err) => {
-                this.error = err
+                this.currentFile = ''
+                this.$toast.add({ severity: 'error', summary: this.$t('editor.error') + path, detail: err, life: 3000 })
             }).finally(() => {
                 this.loading = false
             })
 
-        },
-
-        OnKeyDown (e) {
-            if (e.ctrlKey && e.key === 's') {
-                this.Save()
-            }
         },
 
         Options (event) {
@@ -107,6 +108,11 @@ export default {
         },
 
         Save () {
+            if (! this.currentFile) {
+                this.SaveAs()
+                return
+            }
+
             if (! this.changed) return
 
             this.loading = true
@@ -123,12 +129,24 @@ export default {
             })
         },
 
-        onScroll (e) {
+        OnScroll (e) {
             const editor = this.$refs.editor
             const lineNumbers = this.$el.querySelector('.line-numbers')
 
             lineNumbers.scrollTop = editor.scrollTop
         },
+
+        OnKeyUp (e) {
+            this.changed = true
+
+            if (e.ctrlKey && e.key === 's') {
+                this.Save()
+            }
+        },
+
+        SaveAs () {
+            console.log('save as')
+        }
     }
 }
 </script>
@@ -163,6 +181,7 @@ export default {
         border-radius: 5px;
         width: 35px;
         overflow: hidden;
+        padding-bottom: 20px;
     }
 
     .line-number {

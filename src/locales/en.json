@@ -97,7 +97,7 @@
         "file": "File: ",
         "newfile": "New File",
         "filemenu": "File",
-        "saveerror": "Error Saving File: "
-
+        "saveerror": "Error Saving File: ",
+        "error": "Error Loading File: "
     }
 }
