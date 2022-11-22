@@ -3,22 +3,19 @@
         <div class="flex justify-content-center">
             <div class="path-bar">
                 <div class="path flex">
-                    <div class="ml-2">{{ $t('editor.file') }}</div>
-                    <div class="ml-2 text-primary">{{ file ? file : $t('editor.newfile') }}</div>
+                    <div class="ml-2 py-1 px-2 text-gray-200">{{ $t('editor.file') }}</div>
+                    <div class="text-primary file-name py-1 px-2 flex-grow-1">{{ currentFile ? currentFile : $t('editor.newfile') }}</div>
+
+                    <Button icon="pi pi-angle-down" class="mr-1 p-button-text py-1" :label="$t('editor.filemenu')" @click="Options"></Button>
+
+                    <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
                 </div>
             </div>
         </div>
 
-        <div class="text-editor w-full h-full text-center">
-            <div class="h-full text-editor-area text-left flex">
-                <div class="line-numbers">
-                    <div v-for="_, index in text.split('\n')" :key="index" class="line-number">
-                        {{ index + 1 }}
-                    </div>
-                </div>
-
-                <div contenteditable="true" class="w-full h-full" ref="editable" @input="onInput"></div>
-
+        <div class="flex justify-content-center h-full">
+            <div class="text-editor" @contextmenu="Options">
+                <PrismEditor :tabSize="4" class="text-area" v-model="text" :highlight="HighLight" lineNumbers />
             </div>
         </div>
     </Window>
@@ -29,15 +26,20 @@ import SSHClient from '@/services/ssh'
 
 import Window from '@/components/windows/Window'
 
+import { PrismEditor } from 'vue-prism-editor'
+import 'vue-prism-editor/dist/prismeditor.min.css'
+
+
 export default {
     name: 'Editor',
 
     components: {
-        Window
+        Window,
+        PrismEditor
     },
 
     props: {
-        openFile: {
+        file: {
             type: String,
             default: ''
         }
@@ -50,13 +52,29 @@ export default {
             loading: true,
             error: '',
 
-            file: ''
+            currentFile: '',
+
+            optionsContextMenuItems: [
+                {
+                    label: this.$t('editor.save'),
+                    icon: 'pi pi-save',
+                    command: this.Save
+                },
+                {
+                    label: this.$t('editor.saveas'),
+                    icon: 'pi pi-clone'
+                }
+            ],
+
+            changed: false
+
         }
     },
 
     mounted () {
-        if (this.openFile) {
-            this.Read(this.openFile)
+        if (this.file) {
+            this.currentFile = this.file
+            this.Read(this.currentFile)
         }
     },
 
@@ -66,6 +84,7 @@ export default {
             this.error = ''
 
             SSHClient.ReadFile(path).then((result) => {
+                console.log(result)
                 this.text = result
             }).catch((err) => {
                 this.error = err
@@ -75,9 +94,25 @@ export default {
 
         },
 
-        onInput (e) {
-            console.log(e.target.innerText)
-            this.text = e.target.innerText
+        HighLight (text) {
+            return text
+        },
+
+        Options (event) {
+            this.$refs.optionsmenu.toggle(event)
+        },
+
+        Save () {
+            if (! this.changed) return
+
+            this.loading = true
+
+            SSHClient.WriteFile(this.currentFile, this.text)
+            .catch((err) => {
+                this.$toast.add({ severity: 'error', summary: this.$t('editor.saveerror') + this.currentFile, detail: err, life: 6000 })
+            }).finally(() => {
+                this.loading = false
+            })
         }
     }
 }
@@ -96,26 +131,28 @@ export default {
         width: 98%;
     }
 
-    .text-editor-area {
-        margin: 5px;
+    .text-editor {
         background-color: #0000008a !important;
         border-radius: 5px;
-        resize: none;
-        resize: vertical;
-        max-height: 200px;
-        min-height: 200px;
         width: 98%;
-        border: none;
-        padding: 10px 10px 10px 25px;
-        gap: 10px;
-        line-height: 21px;
+        padding: 10px;
+        height: calc(100% - 100px);
     }
 
-    .text-editor-area:focus {
+    .prism-editor__container {
+        height: 100%;
+    }
+
+    .prism-editor__textarea:focus {
         outline: none;
     }
 
-    .line-numbers {
-        width: 20px;
+    .file-name {
+        background-color: #00000049 !important;
+        border-radius: 5px;
+    }
+
+    .prism-editor__line-number {
+        color: #7a7a7a;
     }
 </style>

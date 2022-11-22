@@ -95,7 +95,9 @@
         "saveconfirm": "File Saved",
         "saveconfirmtext": " has been saved successfully.",
         "file": "File: ",
-        "newfile": "New File"
+        "newfile": "New File",
+        "filemenu": "File",
+        "saveerror": "Error Saving File: "
 
     }
 }

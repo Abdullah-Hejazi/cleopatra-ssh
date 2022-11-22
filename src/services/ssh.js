@@ -50,7 +50,7 @@ export default {
 	},
 
 	ReadFile: async (file) => {
-		return sshSession.spawn("cat " + file)
+		return sshSession.exec("cat " + file)
 	},
 
 	CreateFile: async (file) => {
@@ -90,5 +90,9 @@ export default {
 
 	ChangePermissions: async (file, permissions, recursive) => {
 		return sshSession.exec('chmod ' + (recursive ? '-R ' : '') + permissions + ' ' + file)
+	},
+
+	WriteFile: async (file, content) => {
+		return sshSession.exec("cat <<'EOF' >" + file + "\n" + content + "\nEOF")
 	}
 }
