@@ -44,7 +44,7 @@
         "delete": "Delete",
         "rename": "Rename",
         "edit": "Edit",
-        "properties": "Properties",
+        "permissions": "Change Permissions",
         "execute": "Execute",
         "download": "Download",
         "exists": "Error: File Already Exists",
@@ -59,6 +59,14 @@
         "uploading": "Uploading",
         "uploadfailed": "Upload Failed",
         "uploaded": "Upload Successful",
-        "downloaded": "Download Successful"
+        "downloaded": "Download Successful",
+        "rename": "Rename",
+        "renamefailed": "Rename Failed",
+        "deleteconfirmtitle": "Confirm Deletion",
+        "deleteconfirmtext": "Are you sure you want to delete ",
+        "deletefiles": " files ?",
+        "deletefailed": "Delete Failed",
+        "options": "Options",
+        "paste": "Paste"
     }
 }

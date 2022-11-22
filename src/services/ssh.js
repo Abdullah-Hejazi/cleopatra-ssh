@@ -71,5 +71,13 @@ export default {
 
 	Upload: async (localPath, remotePath, options) => {
 		return sshSession.sftp().fastPut(localPath, remotePath, options)
+	},
+
+	Move: async (oldPath, newPath) => {
+		return sshSession.exec('mv ' + oldPath + ' ' + newPath)
+	},
+
+	Delete: async (file) => {
+		return sshSession.exec('rm -rdf ' + file)
 	}
 }

@@ -8,14 +8,11 @@
                 </div>
 
                 <div class="path-controls p-0">
-                    <Button icon="pi pi-upload" class="mr-1 p-button-text" @click="UploadContextMenu" v-tooltip.bottom="$t('folder.upload')"></Button>
-                    <Button icon="pi pi-plus" class="mr-1 p-button-text" @click="NewFile" v-tooltip.bottom="$t('folder.newfile')"></Button>
-                    <Button icon="pi pi-refresh" class="mr-1 p-button-text" @click="Load(currentPath)" v-tooltip.bottom="$t('folder.refresh')"></Button>
+                    <Button icon="pi pi-cog" class="mr-1 p-button-text" @click="Options" v-tooltip.bottom="$t('folder.options')"></Button>
+                    <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
                 </div>
             </div>
         </div>
-
-        <ContextMenu ref="uploadmenu" :model="uploadContextMenuItems" />
 
         <div class="folder-browser-window flex unselectable-text">
             <div class="side-bar col-3">
@@ -99,6 +96,18 @@
                 <div class="mt-3">{{ $t('folder.uploaded') }}</div>
             </div>
         </Dialog>
+
+        <Dialog :header="$t('folder.rename')" v-model:visible="rename.visible" class="display-name-dialog" :modal="true">
+            <div class="p-text-secondary">
+                <InputText :placeholder="files[rename.index].name" v-model="rename.name" class="w-full mt-3" />
+            </div>
+
+            <template #footer>
+                <div class="flex justify-content-center">
+                    <Button :label="$t('folder.rename')" @click="Rename" />
+                </div>
+            </template>
+        </Dialog>
     </Window>
 </template>
 
@@ -170,14 +179,16 @@ export default {
                 },
                 {
 					label: this.$t('folder.rename'),
-					icon: 'pi pi-pencil'
+					icon: 'pi pi-pencil',
+                    command: this.RenameDialog
                 },
                 {
 					label: this.$t('folder.delete'),
-					icon: 'pi pi-trash'
+					icon: 'pi pi-trash',
+                    command: this.DeleteConfirm
                 },
                 {
-					label: this.$t('folder.properties'),
+					label: this.$t('folder.permissions'),
 					icon: 'pi pi-cog'
                 }
             ],
@@ -206,14 +217,16 @@ export default {
                 },
                 {
 					label: this.$t('folder.rename'),
-					icon: 'pi pi-pencil'
+					icon: 'pi pi-pencil',
+                    command: this.RenameDialog
                 },
                 {
 					label: this.$t('folder.delete'),
-					icon: 'pi pi-trash'
+					icon: 'pi pi-trash',
+                    command: this.DeleteConfirm
                 },
                 {
-					label: this.$t('folder.properties'),
+					label: this.$t('folder.permissions'),
 					icon: 'pi pi-cog'
                 }
             ],
@@ -234,21 +247,43 @@ export default {
                 },
                 {
 					label: this.$t('folder.delete'),
-					icon: 'pi pi-trash'
+					icon: 'pi pi-trash',
+                    command: this.DeleteConfirm
                 }
             ],
 
-            uploadContextMenuItems: [
+            optionsContextMenuItems: [
                 {
-					label: this.$t('folder.uploadfolder'),
-					icon: 'pi pi-folder-open',
-                    command: () => this.Upload(true)
+                    label: this.$t('folder.newfile'),
+                    icon: 'pi pi-file',
+                    command: () => this.NewFile(false)
                 },
                 {
-					label: this.$t('folder.uploadfile'),
-					icon: 'pi pi-file',
-                    command: () => this.Upload(false)
+                    label: this.$t('folder.upload'),
+                    icon: 'pi pi-upload',
+                    items: [
+                        {
+                            label: this.$t('folder.uploadfolder'),
+                            icon: 'pi pi-folder-open',
+                            command: () => this.Upload(true)
+                        },
+                        {
+                            label: this.$t('folder.uploadfile'),
+                            icon: 'pi pi-file',
+                            command: () => this.Upload(false)
+                        },
+                    ]
                 },
+                {
+                    label: this.$t('folder.refresh'),
+                    icon: 'pi pi-refresh',
+                    command: () => this.Load(this.currentPath)
+                },
+                {
+                    label: this.$t('folder.paste'),
+                    icon: 'pi pi-copy',
+                    command: this.Paste
+                }
             ],
 
             selected: [],
@@ -261,6 +296,12 @@ export default {
             upload: {
                 visible: false,
                 items: {}
+            },
+
+            rename: {
+                visible: false,
+                name: '',
+                index: 0
             }
         }
     },
@@ -605,6 +646,64 @@ export default {
             }).catch((err) => {
                 this.$toast.add({severity:'error', summary: this.$t('folder.uploadfailed') + ': ' + file, detail: err, life: 6000});
             })
+        },
+
+        RenameDialog () {
+            if (this.selected.length !== 1) return
+
+            this.rename.name = ''
+            this.rename.visible = true
+            this.rename.index = this.selected[0]
+        },
+
+        Rename () {
+            let file = this.files[this.rename.index].name
+
+            if (file === this.rename.name) {
+                this.rename.visible = false
+                return
+            }
+
+            SSHClient.Move(this.currentPath + '/' + file, this.currentPath + '/' + this.rename.name).then(() => {
+                this.Load(this.currentPath)
+            }).catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.renamefailed') + ': ' + file, detail: err, life: 6000});
+            }).finally(() => {
+                this.rename.visible = false
+            })
+        },
+
+        DeleteConfirm () {
+            if (this.selected.length === 0) return
+
+            this.$confirm.require({
+                message: this.$t('folder.deleteconfirmtext') + this.selected.length + this.$t('folder.deletefiles'),
+                header: this.$t('folder.deleteconfirmtitle'),
+                icon: 'pi pi-exclamation-triangle',
+                accept: () => {
+                    this.Delete()
+                }
+            });
+        },
+
+        Delete () {
+            this.selected.forEach((index) => {
+                let file = this.files[index].name
+
+                this.DeleteFile(file)
+            })
+        },
+
+        DeleteFile(file) {
+            SSHClient.Delete(this.currentPath + '/' + file).then(() => {
+                this.Load(this.currentPath)
+            }).catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.deletefailed') + ': ' + file, detail: err, life: 6000});
+            })
+        },
+
+        Options (event) {
+            this.$refs.optionsmenu.show(event)
         }
     }
 }
