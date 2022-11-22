@@ -14,8 +14,8 @@
         </div>
 
         <div class="flex justify-content-center h-full">
-            <div class="text-editor" @contextmenu="Options">
-                <PrismEditor :tabSize="4" class="text-area" v-model="text" :highlight="HighLight" lineNumbers />
+            <div class="text-editor" @contextmenu="Options" @keydown="OnKeyDown">
+                <PrismEditor @input="changed = true" :tabSize="4" class="text-area" v-model="text" :highlight="HighLight" lineNumbers />
             </div>
         </div>
     </Window>
@@ -84,7 +84,6 @@ export default {
             this.error = ''
 
             SSHClient.ReadFile(path).then((result) => {
-                console.log(result)
                 this.text = result
             }).catch((err) => {
                 this.error = err
@@ -94,8 +93,14 @@ export default {
 
         },
 
+        OnKeyDown (e) {
+            if (e.ctrlKey && e.key === 's') {
+                this.Save()
+            }
+        },
+
         HighLight (text) {
-            return text
+            return '<div style="color: white;">' + text + '</div>'
         },
 
         Options (event) {
@@ -108,6 +113,10 @@ export default {
             this.loading = true
 
             SSHClient.WriteFile(this.currentFile, this.text)
+            .then(() => {
+                this.changed = false
+                this.$toast.add({ severity: 'success', summary: this.$t('editor.saveconfirm'), life: 3000 })
+            })
             .catch((err) => {
                 this.$toast.add({ severity: 'error', summary: this.$t('editor.saveerror') + this.currentFile, detail: err, life: 6000 })
             }).finally(() => {
@@ -141,6 +150,11 @@ export default {
 
     .prism-editor__container {
         height: 100%;
+    }
+
+    .prism-editor__textarea {
+        height: 100%;
+        resize: vertical;
     }
 
     .prism-editor__textarea:focus {
