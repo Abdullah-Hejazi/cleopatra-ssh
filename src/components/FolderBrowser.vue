@@ -338,6 +338,8 @@ export default {
             this.loading = true
             this.error = ''
 
+            this.selected = []
+
             SSHClient.List(path).then((result) => {
                 this.files = Helpers.ParseDirectory(result).sort((a, b) => {
                     if (a.directory && !b.directory)        return -1
@@ -585,6 +587,8 @@ export default {
 
                 return 0
             })
+
+            files[0] += directory
             
             files.forEach((file) => {
                 let isDirectory = file.substring(0, 1) === 'd'
