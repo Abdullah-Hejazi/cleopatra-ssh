@@ -60,29 +60,43 @@ export default {
                 FolderBrowser: '/folder.png',
                 Terminal: '/terminal.png',
                 ImageViewer: '/imageviewer.png'
-            }
+            },
+
+            currentZIndex: 1500
         }
     },
 
     methods: {
-        OpenProcess (process) {
+        OpenProcess (process, file='') {
             let uid = Helpers.GetRandomString()
 
             this.processes[uid] = {
                 id: uid,
                 name: process,
                 title: this.$t('general.' + process),
-                zIndex: 1500,
-                visible: true
+                zIndex: this.currentZIndex++,
+                visible: true,
+                file: file
             }
         },
 
         GetProcessProps (id) {
+            if (this.processes[id].name === 'FolderBrowser') {
+                return {
+                    zIndex: this.processes[id].zIndex,
+                    onClose: () => this.CloseProcess(id),
+                    onMinimize: () => this.MinimizeProcess(id),
+                    onZIndexChange: () => this.onZIndexChange(id),
+                    onOpenProcess: this.OpenProcess
+                }
+            }
+
             return {
                 zIndex: this.processes[id].zIndex,
                 onClose: () => this.CloseProcess(id),
                 onMinimize: () => this.MinimizeProcess(id),
-                onZIndexChange: () => this.onZIndexChange(id)
+                onZIndexChange: () => this.onZIndexChange(id),
+                file: this.processes[id].file
             }
         },
 
@@ -111,16 +125,8 @@ export default {
         },
 
         onZIndexChange (id) {
-            let maxZIndex = 1500
-
-            for (let process in this.processes) {
-                if (this.processes[process].zIndex > maxZIndex) {
-                    maxZIndex = this.processes[process].zIndex
-                }
-            }
-
             if (this.processes[id])
-                this.processes[id].zIndex = maxZIndex + 1
+                this.processes[id].zIndex = this.currentZIndex++
         }
     }
 }

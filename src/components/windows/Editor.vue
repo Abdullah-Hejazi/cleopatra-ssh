@@ -52,6 +52,8 @@
         </Modal>
 
         <FileDialog v-if="saveAs.fileDialog" type="folders" :Finish="SetPath" :Cancel="CancelDialog" />
+
+        <FileDialog v-if="openDialog" type="files" :Finish="OpenFile" :Cancel="CancelOpenDialog" />
     </div>
 </template>
 
@@ -104,11 +106,16 @@ export default {
         return {
             text: '',
 
-            loading: true,
+            loading: false,
 
             currentFile: '',
 
             optionsContextMenuItems: [
+                {
+                    label: this.$t('editor.open'),
+                    icon: 'pi pi-folder-open',
+                    command: this.OpenDialog
+                },
                 {
                     label: this.$t('editor.save'),
                     icon: 'pi pi-save',
@@ -128,17 +135,18 @@ export default {
                 name: '',
                 path: Helpers.GetHomeDirectory(),
                 fileDialog: false
-            }
+            },
+
+            openDialog: false
         }
     },
 
     mounted () {
+        this.$refs.editor.addEventListener('scroll', this.OnScroll)
+
         if (this.file) {
             this.Read(this.file)
         }
-
-        this.loading = false
-        this.$refs.editor.addEventListener('scroll', this.OnScroll)
     },
 
     beforeDestroy () {
@@ -147,6 +155,7 @@ export default {
 
     methods: {
         Read (path) {
+            this.currentFile = ''
             this.loading = true
 
             SSHClient.ReadFile(path).then((result) => {
@@ -249,6 +258,31 @@ export default {
             } else {
                 this.onClose()
             }
+        },
+
+        CancelOpenDialog () {
+            this.openDialog = false
+        },
+
+        OpenDialog () {
+            if (this.changed) {
+                this.$confirm.require({
+                    message: this.$t('editor.closeconfirm'),
+                    header: this.$t('editor.close'),
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: () => {
+                        this.openDialog = true
+                    }
+                })
+                return
+            }
+
+            this.openDialog = true
+        },
+
+        OpenFile (file) {
+            this.Read(file.path + '/' + file.name)
+            this.openDialog = false
         }
     }
 }
@@ -282,7 +316,8 @@ export default {
     .line-numbers {
         background-color: #00000049 !important;
         border-radius: 5px;
-        width: 35px;
+        min-width: 35px;
+        width: auto;
         overflow: hidden;
         padding-bottom: 20px;
     }

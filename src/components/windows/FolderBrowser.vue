@@ -182,7 +182,8 @@ export default {
         'onClose',
         'onMinimize',
         'zIndex',
-        'onZIndexChange'
+        'onZIndexChange',
+        'onOpenProcess'
     ],
 
     components: {
@@ -266,8 +267,9 @@ export default {
 
             fileContextMenuItems: [
                 {
-					label: this.$t('folder.edit'),
-					icon: 'pi pi-file'
+					label: this.$t('folder.openfile'),
+					icon: 'pi pi-file',
+                    command: this.OpenFile
                 },
                 {
 					label: this.$t('folder.download'),
@@ -528,8 +530,9 @@ export default {
                 if (item.directory) {
                     this.Load(path)
                 }
+            } else {
+                this.OpenFile()
             }
-            
         },
 
         GoBack () {
@@ -989,6 +992,35 @@ export default {
                 })
             })
         },
+
+        OpenFile () {
+            if (this.selected.length !== 1) return
+
+            let file = this.files[this.selected[0]]
+
+            if (this.IsImage(file)) {
+                this.onOpenProcess('ImageViewer', this.currentPath + '/' + file.name)
+                return
+            }
+
+            // if large file
+            if (file.size > 1000000) {
+                this.$confirm.require({
+                    message: this.$t('folder.openlargefileconfirmtext') + file.name + this.$t('folder.openlargefileconfirmtext2'),
+                    header: this.$t('folder.openlargefileconfirm'),
+                    icon: 'pi pi-exclamation-triangle',
+                    accept: () => {
+                        this.onOpenProcess('Editor', this.currentPath + '/' + file.name)
+                    }
+                })
+            } else {
+                this.onOpenProcess('Editor', this.currentPath + '/' + file.name)
+            }
+        },
+
+        IsImage (file) {
+            return file.name.match(/\.(jpeg|jpg|gif|png|webp)$/)
+        }
     }
 }
 </script>

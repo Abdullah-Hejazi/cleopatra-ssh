@@ -24,8 +24,8 @@
                         <Button icon="pi pi-image" :label="$t('image.select')" @click="SelectImageDialog" />
                     </div>
 
-                    <div class="w-full text-center flex justify-content-center" v-if="!loading && currentFile">
-                        <img :src="image" />
+                    <div class="w-full text-center flex justify-content-center" style="overflow: auto" v-if="!loading && currentFile">
+                        <img :src="image" :style="imageStyle" @click="ImageZoom" />
                     </div>
                 </div>
             </div>
@@ -91,6 +91,14 @@ export default {
                 }
             ],
 
+            imageStyle: {
+                cursor: '-webkit-zoom-in',
+                width: 'auto',
+                height: 'auto'
+            },
+
+            zoomed: false,
+
             openDialog: false
         }
     },
@@ -106,7 +114,7 @@ export default {
             this.loading = true
             this.currentFile = ''
 
-            SSHClient.Open(path).then((result) => {
+            SSHClient.ReadFile(path, 'base64').then((result) => {
                 this.image = 'data:image/png;base64,' + result
                 this.currentFile = path
             }).catch((err) => {
@@ -133,6 +141,27 @@ export default {
         SetPath (file) {
             this.openDialog = false
             this.LoadImage(file.path + '/' + file.name)
+        },
+
+        ImageZoom () {
+            var img = new Image()
+            img.src = this.image
+
+            if (this.zoomed) {
+                this.imageStyle = {
+                    cursor: '-webkit-zoom-in',
+                    width: 'auto',
+                    height: 'auto'
+                }
+            } else {
+                this.imageStyle = {
+                    cursor: '-webkit-zoom-out',
+                    width: img.width + 'px',
+                    height: img.height + 'px'
+                }
+            }
+
+            this.zoomed = !this.zoomed
         }
     }
 }

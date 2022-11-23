@@ -49,8 +49,10 @@ export default {
 		return await sshSession.exec('find ' + file + ' -printf "%y %P\n"')
 	},
 
-	ReadFile: async (file) => {
-		return sshSession.exec("cat " + file)
+	ReadFile: async (file, encoding='utf8') => {
+		return sshSession.sftp().readFile(file, {
+			encoding: encoding
+		})
 	},
 
 	CreateFile: async (file) => {
@@ -93,12 +95,6 @@ export default {
 	},
 
 	WriteFile: async (file, content) => {
-		return sshSession.exec("cat <<'EOF' >" + file + "\n" + content + "\nEOF")
-	},
-
-	Open: async (file) => {
-		return sshSession.sftp().readFile(file, {
-			encoding: 'base64'
-		})
+		return sshSession.sftp().writeFile(file, content)
 	}
 }
