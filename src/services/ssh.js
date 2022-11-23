@@ -2,11 +2,13 @@ var SSH2Promise = require('ssh2-promise')
 const path = require('path')
 
 let sshSession = null
+let sshFtp = null
 let sshUser = {}
 
 export default {
     EstablishConnection: async (account) => {
         if (sshSession !== null) {
+			sshFtp.close()
             sshSession.close()
         }
 
@@ -16,6 +18,8 @@ export default {
 			username: account.username,
 			password: account.password
 		})
+
+		sshFtp = await sshSession.sftp()
 
 		sshUser.host = account.host
 		sshUser.username = account.username
@@ -42,7 +46,7 @@ export default {
     },
 
 	List: async (file) => {
-		return await sshSession.sftp().readdir(file)
+		return await sshFtp.readdir(file)
 	},
 
 	ListNested: async (file) => {
@@ -50,7 +54,7 @@ export default {
 	},
 
 	ReadFile: async (file, encoding='utf8') => {
-		return sshSession.sftp().readFile(file, {
+		return sshFtp.readFile(file, {
 			encoding: encoding
 		})
 	},
@@ -68,11 +72,11 @@ export default {
 	},
 
 	Download: async (remotePath, localPath, options) => {
-		return sshSession.sftp().fastGet(remotePath, localPath, options)
+		return sshFtp.fastGet(remotePath, localPath, options)
 	},
 
 	Upload: async (localPath, remotePath, options) => {
-		return sshSession.sftp().fastPut(localPath, remotePath, options)
+		return sshFtp.fastPut(localPath, remotePath, options)
 	},
 
 	Move: async (oldPath, newPath) => {
@@ -95,6 +99,10 @@ export default {
 	},
 
 	WriteFile: async (file, content) => {
-		return sshSession.sftp().writeFile(file, content)
+		return sshFtp.writeFile(file, content)
+	},
+
+	Shell: async (command) => {
+		return sshSession.shell(command)
 	}
 }

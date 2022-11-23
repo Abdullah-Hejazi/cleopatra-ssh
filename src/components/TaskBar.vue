@@ -29,7 +29,7 @@ export default {
                     process: 'FolderBrowser'
                 },
                 {
-                    name: this.$t('terminal.title'),
+                    name: this.$t('general.Terminal'),
                     icon: '/terminal.png',
                     process: 'Terminal'
                 },

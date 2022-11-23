@@ -1,5 +1,6 @@
 <template>
     <div class="desktop-background flex flex-column align-content-center flex-wrap justify-content-end">
+        <Terminal />
         <div v-for="process in processes" :key="process.id">
             <KeepAlive>
                 <component :is="process.name" v-bind="GetProcessProps(process.id)" v-if="process.visible" />
@@ -33,6 +34,7 @@ import FolderBrowser from '@/components/windows/FolderBrowser'
 import Editor from '@/components/windows/Editor'
 import FileDialog from '@/components/windows/FileDialog'
 import ImageViewer from '@/components/windows/ImageViewer'
+import Terminal from '@/components/windows/Terminal'
 
 import IconItem from '@/components/IconItem'
 
@@ -47,7 +49,8 @@ export default {
         Editor,
         FileDialog,
         IconItem,
-        ImageViewer
+        ImageViewer,
+        Terminal
     },
 
     data () {
