@@ -1,5 +1,5 @@
 <template>
-    <Window :title="$t('folder.browser')" icon="/folder.png" :defaultSize="{width: 850, height: 500}">
+    <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :title="$t('folder.browser')" icon="/folder.png" :defaultSize="{width: 850, height: 500}" :onClose="onClose" :onMinimize="onMinimize">
         <div class="path-bar">
             <div class="path flex">
                 <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
@@ -177,6 +177,13 @@ import Window from '@/components/windows/Window'
 
 export default {
     name: 'FolderBrowser',
+
+    props: [
+        'onClose',
+        'onMinimize',
+        'zIndex',
+        'onZIndexChange'
+    ],
 
     components: {
         Window

@@ -11,7 +11,14 @@
         "settings": "Settings",
         "language": "Language",
         "success": "Success",
-        "delete": "Delete"
+        "delete": "Delete",
+        "processes": "Active Apps",
+        "Editor": "Text Editor",
+        "FolderBrowser": "Folder Browser",
+        "Terminal": "Terminal",
+        "ImageViewer": "Image Viewer",
+        "minimizedprocesses": "Minimized Applications",
+        "noprocesses": "You have no Minimized Applications"
     },
 
     "login": {
@@ -106,5 +113,9 @@
         "title": "Select File Dialog",
         "cancel": "Cancel",
         "select": "Select"
+    },
+
+    "terminal": {
+        "title": "Terminal"
     }
 }

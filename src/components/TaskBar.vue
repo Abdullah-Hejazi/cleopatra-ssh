@@ -1,6 +1,7 @@
 <template>
     <div class="taskbar flex">
-        <IconItem v-for="item in taskbarItems" :key="item.name" :name="item.name" :icon="item.icon" width="48" />
+        <IconItem :name="$t('general.processes')" icon="/apps.png" width="48" @click="onActiveApps" />
+        <IconItem v-for="item in taskbarItems" :key="item.name" :name="item.name" :icon="item.icon" width="48" @click="onOpen(item.process)" />
     </div>
 </template>
 
@@ -10,6 +11,11 @@ import IconItem from '@/components/IconItem'
 export default {
     name: 'TaskBar',
 
+    props: [
+        'onOpen',
+        'onActiveApps'
+    ],
+
     components: {
         IconItem
     },
@@ -18,16 +24,19 @@ export default {
         return {
             taskbarItems: [
                 {
-                    name: 'Folder Browser',
-                    icon: '/folder.png'
+                    name: this.$t('folder.browser'),
+                    icon: '/folder.png',
+                    process: 'FolderBrowser'
                 },
                 {
-                    name: 'Terminal',
-                    icon: '/terminal.png'
+                    name: this.$t('terminal.title'),
+                    icon: '/terminal.png',
+                    process: 'Terminal'
                 },
                 {
-                    name: 'Text Editor',
-                    icon: '/texteditor.png'
+                    name: this.$t('editor.title'),
+                    icon: '/texteditor.png',
+                    process: 'Editor'
                 }
             ]
         }
@@ -37,13 +46,10 @@ export default {
 
 <style>
     .taskbar{
-        background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.2));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border:1px solid rgba(0, 0, 0, 0.062);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        background-color: #0000006e;
         border-radius: 20px;
         padding: 5px 30px 5px 30px;
         margin-bottom: 10px;
+        z-index: 9999;
     }
 </style>

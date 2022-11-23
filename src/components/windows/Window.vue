@@ -1,5 +1,5 @@
 <template>
-    <div class="window" :style="windowStyle">
+    <div class="window" :style="windowStyle" @click="onZIndexChange">
         <div class="window-title-bar flex justify-content-between">
             <div class="window-title-bar-text flex-grow-1" @mousedown="OnRePositionMouseDown" @mouseup="OnRePositionMouseUp">
                 <img v-if="icon" :src="icon" class="window-title-bar-icon" />
@@ -34,7 +34,9 @@ export default {
         'onClose',
         'onMinimize',
         'noMinimize',
-        'noMaximize'
+        'noMaximize',
+        'zIndex',
+        'onZIndexChange'
     ],
 
     data () {
@@ -80,7 +82,8 @@ export default {
                 top: this.position.top + 'px',
                 left: this.position.left + 'px',
                 width: this.size.width + this.size.widthUnit,
-                height: this.size.height + this.size.heightUnit
+                height: this.size.height + this.size.heightUnit,
+                'z-index': this.zIndex
             }
         }
     },

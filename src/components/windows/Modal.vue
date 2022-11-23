@@ -1,5 +1,5 @@
 <template>
-    <Window v-if="modelValue" style="z-index: 2000;" :onClose="Close" :noMinimize="true" :noMaximize="true" :title="header" :defaultSize="size ? size : {width: 450, height: 200}" defaultLocation="center">
+    <Window :onMinimize="onMinimize" v-if="modelValue" style="z-index: 2000;" :onClose="Close" :noMinimize="true" :noMaximize="true" :title="header" :defaultSize="size ? size : {width: 450, height: 200}" defaultLocation="center">
         <slot></slot>
     </Window>
 </template>
@@ -20,7 +20,7 @@ export default {
         'modelValue',
         'header',
         'size',
-        'class'
+        'onMinimize'
     ],
 
     methods: {

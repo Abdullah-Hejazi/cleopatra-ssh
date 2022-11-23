@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Window :title="$t('editor.title')" icon="/texteditor.png" :defaultSize="{width: 700, height: 450}">
+        <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="onClose" :onMinimize="onMinimize" :title="$t('editor.title')" icon="/texteditor.png" :defaultSize="{width: 700, height: 450}">
             <div class="flex justify-content-center">
                 <div class="path-bar">
                     <div class="path flex">
@@ -77,6 +77,26 @@ export default {
         file: {
             type: String,
             default: ''
+        },
+
+        onClose: {
+            type: Function,
+            default: () => {}
+        },
+
+        onMinimize: {
+            type: Function,
+            default: () => {}
+        },
+
+        zIndex: {
+            type: Number,
+            default: 1500
+        },
+
+        onZIndexChange: {
+            type: Function,
+            default: () => {}
         }
     },
 
