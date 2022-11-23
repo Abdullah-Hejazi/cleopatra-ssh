@@ -127,10 +127,17 @@ export default {
                     return 0
                 })
 
-                this.files = (this.type === 'folders') ? data.filter((item) => {
-                    return item.directory
-                }) : data
-
+                if (this.type === 'folders') {
+                    this.files = data.filter((item) => {
+                        return item.directory
+                    })
+                } else if (this.type === 'images') {
+                    this.files = data.filter((item) => {
+                        return item.directory || item.name.match(/\.(jpeg|jpg|gif|png|webp)$/) != null
+                    })
+                } else {
+                    this.files = data
+                }
 
                 this.currentPath = path
                 this.UpdateSideBarItem()
@@ -250,18 +257,33 @@ export default {
 
         Select () {
             if (this.selected.length === 0) {
-                this.Finish({
-                    path: this.currentPath,
-                    name: ''
-                })
+                if (this.type === 'folders') {
+                    this.Finish({
+                        path: this.currentPath,
+                        name: ''
+                    })
+                }
+
                 return
             }
 
             if (! this.multiple) {
-                this.Finish({
-                    path: this.currentPath,
-                    name: this.files[this.selected[0]].name
-                })
+                if (this.type === 'folders' && this.files[this.selected[0]].directory) {
+                    this.Finish({
+                        path: this.currentPath,
+                        name: this.files[this.selected[0]].name
+                    })
+                } else if (this.type === 'files' && !this.files[this.selected[0]].directory) {
+                    this.Finish({
+                        path: this.currentPath,
+                        name: this.files[this.selected[0]].name
+                    })
+                } else if (this.type === 'images' && !this.files[this.selected[0]].directory) {
+                    this.Finish({
+                        path: this.currentPath,
+                        name: this.files[this.selected[0]].name
+                    })
+                }
                 return
             }
 

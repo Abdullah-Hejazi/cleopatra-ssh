@@ -1,6 +1,5 @@
 <template>
     <div class="desktop-background flex flex-column align-content-center flex-wrap justify-content-end">
-        
         <div v-for="process in processes" :key="process.id">
             <KeepAlive>
                 <component :is="process.name" v-bind="GetProcessProps(process.id)" v-if="process.visible" />
@@ -33,6 +32,8 @@ import TaskBar from '@/components/TaskBar'
 import FolderBrowser from '@/components/windows/FolderBrowser'
 import Editor from '@/components/windows/Editor'
 import FileDialog from '@/components/windows/FileDialog'
+import ImageViewer from '@/components/windows/ImageViewer'
+
 import IconItem from '@/components/IconItem'
 
 import Helpers from '@/services/helpers'
@@ -45,7 +46,8 @@ export default {
         FolderBrowser,
         Editor,
         FileDialog,
-        IconItem
+        IconItem,
+        ImageViewer
     },
 
     data () {
@@ -56,7 +58,8 @@ export default {
             icons: {
                 Editor: '/texteditor.png',
                 FolderBrowser: '/folder.png',
-                Terminal: '/terminal.png'
+                Terminal: '/terminal.png',
+                ImageViewer: '/imageviewer.png'
             }
         }
     },

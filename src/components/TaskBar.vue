@@ -37,6 +37,11 @@ export default {
                     name: this.$t('editor.title'),
                     icon: '/texteditor.png',
                     process: 'Editor'
+                },
+                {
+                    name: this.$t('general.ImageViewer'),
+                    icon: '/imageviewer.png',
+                    process: 'ImageViewer'
                 }
             ]
         }

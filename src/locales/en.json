@@ -111,6 +111,14 @@
         "closeconfirm": "You have unsaved changes, are you sure you want to close ?"
     },
 
+    "image": {
+        "open": "Open Image",
+        "openfailed": "Open Failed",
+        "noimage": "No Image Has Been Selected",
+        "select": "Select Image",
+        "error": "Error Loading Image: "
+    },
+
     "filedialog": {
         "title": "Select File Dialog",
         "cancel": "Cancel",

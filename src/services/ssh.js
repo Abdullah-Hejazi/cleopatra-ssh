@@ -94,5 +94,11 @@ export default {
 
 	WriteFile: async (file, content) => {
 		return sshSession.exec("cat <<'EOF' >" + file + "\n" + content + "\nEOF")
+	},
+
+	Open: async (file) => {
+		return sshSession.sftp().readFile(file, {
+			encoding: 'base64'
+		})
 	}
 }
