@@ -1,5 +1,5 @@
 <template>
-    <Window :onClose="Cancel" :noMinimize="true" :title="$t('filedialog.title')" icon="/folder.png" :defaultSize="{width: 650, height: 400}" defaultLocation="center">
+    <Window style="z-index: 2100;" :onClose="Cancel" :noMinimize="true" :title="$t('filedialog.title')" icon="/folder.png" :defaultSize="{width: 650, height: 400}" defaultLocation="center">
         <div class="path-bar">
             <div class="path flex">
                 <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
@@ -250,19 +250,28 @@ export default {
 
         Select () {
             if (this.selected.length === 0) {
-                this.Finish(this.currentPath)
+                this.Finish({
+                    path: this.currentPath,
+                    name: ''
+                })
                 return
             }
 
             if (! this.multiple) {
-                this.Finish(this.files[this.selected[0]])
+                this.Finish({
+                    path: this.currentPath,
+                    name: this.files[this.selected[0]].name
+                })
                 return
             }
 
             let output = []
 
             this.selected.forEach((index) => {
-                output.push(this.files[index])
+                output.push({
+                    path: this.currentPath,
+                    name: this.files[index].name
+                })
             })
 
             this.Finish(output)

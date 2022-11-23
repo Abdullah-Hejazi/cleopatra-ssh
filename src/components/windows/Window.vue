@@ -2,12 +2,12 @@
     <div class="window" :style="windowStyle">
         <div class="window-title-bar flex justify-content-between">
             <div class="window-title-bar-text flex-grow-1" @mousedown="OnRePositionMouseDown" @mouseup="OnRePositionMouseUp">
-                <img :src="icon" class="window-title-bar-icon" />
+                <img v-if="icon" :src="icon" class="window-title-bar-icon" />
                 <span class="m-2">{{ title }}</span>
             </div>
             <div class="window-title-bar-controls flex">
                 <div v-if="!noMinimize" class="window-title-bar-control bg-yellow-500 hover:bg-yellow-400" @click="onMinimize" />
-                <div class="window-title-bar-control bg-green-500 hover:bg-green-400" @click="Maximize" />
+                <div v-if="!noMaximize" class="window-title-bar-control bg-green-500 hover:bg-green-400" @click="Maximize" />
                 <div class="window-title-bar-control bg-red-500 hover:bg-red-400" @click="onClose" />
             </div>
         </div>
@@ -33,7 +33,8 @@ export default {
         'defaultPosition',
         'onClose',
         'onMinimize',
-        'noMinimize'
+        'noMinimize',
+        'noMaximize'
     ],
 
     data () {

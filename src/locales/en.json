@@ -98,7 +98,8 @@
         "newfile": "New File",
         "filemenu": "File",
         "saveerror": "Error Saving File: ",
-        "error": "Error Loading File: "
+        "error": "Error Loading File: ",
+        "name": "File Name"
     },
 
     "filedialog": {
