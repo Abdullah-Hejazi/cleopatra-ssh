@@ -47,8 +47,8 @@ export default {
             },
 
             previousPosition: {
-                top: this.position.top,
-                left: this.position.left
+                top: 50,
+                left: 50
             },
 
             mouseX: 50,
