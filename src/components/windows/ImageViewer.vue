@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="CloseEditor" :onMinimize="onMinimize" :title="$t('editor.title')" icon="/texteditor.png" :defaultSize="{width: 700, height: 450}">
+        <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="onClose" :onMinimize="onMinimize" :title="$t('editor.title')" icon="/texteditor.png" :defaultSize="{width: 700, height: 450}">
             <div class="flex justify-content-center">
                 <div class="path-bar">
                     <div class="path flex">
@@ -234,21 +234,6 @@ export default {
             }).finally(() => {
                 this.loading = false
             })
-        },
-
-        CloseEditor () {
-            if (this.changed) {
-                this.$confirm.require({
-                    message: this.$t('editor.closeconfirm'),
-                    header: this.$t('editor.close'),
-                    icon: 'pi pi-exclamation-triangle',
-                    accept: () => {
-                        this.onClose()
-                    }
-                })
-            } else {
-                this.onClose()
-            }
         }
     }
 }

@@ -116,7 +116,8 @@ export default {
                 }
             }
 
-            this.processes[id].zIndex = maxZIndex + 1
+            if (this.processes[id])
+                this.processes[id].zIndex = maxZIndex + 1
         }
     }
 }

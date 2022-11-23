@@ -106,7 +106,9 @@
         "filemenu": "File",
         "saveerror": "Error Saving File: ",
         "error": "Error Loading File: ",
-        "name": "File Name"
+        "name": "File Name",
+        "close": "Unsaved Changes",
+        "closeconfirm": "You have unsaved changes, are you sure you want to close ?"
     },
 
     "filedialog": {

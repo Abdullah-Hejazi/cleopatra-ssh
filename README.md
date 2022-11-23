@@ -5,11 +5,9 @@ Instead of typing command in your terminal, you can interact with your SSH serve
 It also has a lot of tools such as text editors, image & video viewer, and a lot of other tools.
 
 ### Todo List:
-- [ ] Desktop Window Manager
 - [ ] Login with keys
 - [ ] Image Viewer
 - [ ] Terminal inside the desktop
 - [ ] Multiple terminals
 - [ ] Code Editor with Syntax highlighting
-- [ ] Change ZIndex in desktop windows
 - [ ] Open Terminal Here in folder browser
