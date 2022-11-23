@@ -228,6 +228,11 @@ export default {
                     command: () => this.LoadItem(this.files[this.selected[0]])
                 },
                 {
+					label: this.$t('folder.openterminal'),
+					icon: 'pi pi-dollar',
+                    command: this.OpenTerminal
+                },
+                {
 					label: this.$t('folder.download'),
 					icon: 'pi pi-download',
                     command: this.Download
@@ -352,6 +357,11 @@ export default {
                     label: this.$t('folder.newfile'),
                     icon: 'pi pi-file',
                     command: () => this.NewFile(false)
+                },
+                {
+					label: this.$t('folder.openterminal'),
+					icon: 'pi pi-dollar',
+                    command: () => this.OpenTerminal(true)
                 },
                 {
                     label: this.$t('folder.upload'),
@@ -991,6 +1001,22 @@ export default {
                     }
                 })
             })
+        },
+
+        OpenTerminal (here) {
+            if (here) {
+                this.SpawnTerminal(this.currentPath)
+                return
+            }
+
+            if (this.selected.length !== 1) return
+            if (!this.files[this.selected[0]].directory) return
+
+            this.SpawnTerminal(this.currentPath + '/' + this.files[this.selected[0]].name)
+        },
+
+        SpawnTerminal (path) {
+            this.onOpenProcess('Terminal', path)
         },
 
         OpenFile () {

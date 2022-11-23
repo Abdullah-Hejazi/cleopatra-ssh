@@ -95,7 +95,8 @@
         "changepermissionfailed": "Change Permissions Failed",
         "openlargefileconfirm": "Open Large File",
         "openlargefileconfirmtext": "The File ( ",
-        "openlargefileconfirmtext2": " ) is too large to open in the editor, Are you sure you want to open it ?"
+        "openlargefileconfirmtext2": " ) is too large to open in the editor, Are you sure you want to open it ?",
+        "openterminal": "Open Terminal Here"
     },
 
     "editor": {

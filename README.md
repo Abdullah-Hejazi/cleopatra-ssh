@@ -8,3 +8,4 @@ It also has a lot of tools such as text editors, image & video viewer, and a lot
 - [ ] Terminal inside the desktop
 - [ ] Open Terminal Here in folder browser
 - [ ] Login with keys
+- [ ] Terminal Clear Functionality

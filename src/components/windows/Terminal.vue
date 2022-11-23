@@ -1,9 +1,10 @@
 <template>
     <div>
         <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="CloseTerminal" :onMinimize="onMinimize" :title="$t('general.Terminal')" icon="/terminal.png" :defaultSize="{width: 700, height: 400}">
-            <div class="terminal flex flex-column" @focus="TerminalFocus">
+            <div class="terminal flex flex-column" @focus="TerminalFocus" ref="terminalcontainer">
                 <div>
-                    <pre class="terminal-line flex m-0 my-1" v-for="line, index in lines" :key="index">{{line}}<span class="flex-grow-1" @click="TerminalFocus"><input v-if="index+1 === lines.length" type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
+                    <pre class="terminal-line flex m-0 my-1" v-for="line, index in lines.slice(0, lines.length - 1)" :key="index">{{line}}<span class="flex-grow-1" @click="TerminalFocus"><input v-if="index+1 === lines.length" type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
+                    <pre class="terminal-line flex m-0 my-1">{{lines[lines.length-1]}}<span class="flex-grow-1" @click="TerminalFocus"><input type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
                 </div>
                 <div @click="TerminalFocus" class="flex-grow-1"></div>
             </div>
@@ -72,7 +73,6 @@ export default {
             SSHClient.Shell('cd ' + path).then((socket) => {
                 this.socket = socket
                 this.socket.on('data', this.RecieveBuffer)
-                this.TerminalFocus()
             })
         },
 
@@ -83,23 +83,26 @@ export default {
                 buffer = buffer.toString().replace(match, '')
             })
 
+            let line = buffer.toString().replaceAll('\u0000', '')
 
-            this.lines.push(...buffer.toString().replaceAll('\u0000', '').split('\r\n'))
+            this.lines.push(...line.split('\r\n'))
         },
 
         WriteBuffer () {
             if (! this.socket) return
 
             if (this.command) {
+                if (this.command === 'clear') {
+                    this.lines = []
+                }
+
                 this.socket.write(this.command + '\r')
                 this.command = ''
-                this.TerminalFocus()
                 return
             }
 
             this.socket.write('\r')
             this.command = ''
-            this.TerminalFocus()
         },
 
         CloseTerminal () {
@@ -109,8 +112,22 @@ export default {
 
         TerminalFocus () {
             if (this.$refs.terminalinput) {
-                this.$refs.terminalinput[0].focus()
+                this.$refs.terminalinput.focus()
+
+                this.$refs.terminalcontainer.scrollTo(0, this.$refs.terminalcontainer.scrollHeight)
             }
+        }
+    },
+
+    watch: {
+        // watch lines length
+        lines: {
+            handler () {
+                this.$nextTick(() => {
+                    this.$refs.terminalcontainer.scrollTo(0, this.$refs.terminalcontainer.scrollHeight)
+                })
+            },
+            deep: true
         }
     }
 }

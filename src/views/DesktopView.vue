@@ -1,6 +1,5 @@
 <template>
     <div class="desktop-background flex flex-column align-content-center flex-wrap justify-content-end">
-        <Terminal />
         <div v-for="process in processes" :key="process.id">
             <KeepAlive>
                 <component :is="process.name" v-bind="GetProcessProps(process.id)" v-if="process.visible" />
