@@ -42,13 +42,13 @@ export default {
     data () {
         return {
             position: {
-                top: 50,
-                left: 50
+                top: 50 + Math.random() * (100 - 0),
+                left: 50 + Math.random() * (100 - 0)
             },
 
             previousPosition: {
-                top: 50,
-                left: 50
+                top: this.position.top,
+                left: this.position.left
             },
 
             mouseX: 50,

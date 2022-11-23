@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div>
+        <div style="z-index: 9999;">
             <TaskBar :onOpen="OpenProcess" :onActiveApps="ToggleActiveApps" />
         </div>
     </div>
