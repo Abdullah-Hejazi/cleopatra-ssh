@@ -99,5 +99,11 @@
         "filemenu": "File",
         "saveerror": "Error Saving File: ",
         "error": "Error Loading File: "
+    },
+
+    "filedialog": {
+        "title": "Select File Dialog",
+        "cancel": "Cancel",
+        "select": "Select"
     }
 }

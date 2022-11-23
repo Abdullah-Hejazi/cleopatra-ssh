@@ -986,7 +986,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
     .unselectable-text {
         user-select: none;
     }

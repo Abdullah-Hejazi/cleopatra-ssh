@@ -1,6 +1,6 @@
 <template>
     <div class="desktop-background flex align-content-end flex-wrap justify-content-center">
-        <Editor file="/root/fine.txt" />
+        <FileDialog />
 
         <div>
             <TaskBar />
@@ -12,6 +12,7 @@
 import TaskBar from '@/components/TaskBar'
 import FolderBrowser from '@/components/windows/FolderBrowser'
 import Editor from '@/components/windows/Editor'
+import FileDialog from '@/components/windows/FileDialog'
 
 export default {
     name: 'DesktopView',
@@ -19,7 +20,8 @@ export default {
     components: {
         TaskBar,
         FolderBrowser,
-        Editor
+        Editor,
+        FileDialog
     },
 
     methods: {}

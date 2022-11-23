@@ -6,9 +6,9 @@
                 <span class="m-2">{{ title }}</span>
             </div>
             <div class="window-title-bar-controls flex">
-                <div class="window-title-bar-control bg-yellow-500 hover:bg-yellow-400" />
+                <div v-if="!noMinimize" class="window-title-bar-control bg-yellow-500 hover:bg-yellow-400" @click="onMinimize" />
                 <div class="window-title-bar-control bg-green-500 hover:bg-green-400" @click="Maximize" />
-                <div class="window-title-bar-control bg-red-500 hover:bg-red-400" />
+                <div class="window-title-bar-control bg-red-500 hover:bg-red-400" @click="onClose" />
             </div>
         </div>
 
@@ -30,7 +30,10 @@ export default {
         'icon',
         'defaultSize',
         'defaultLocation',
-        'defaultPosition'
+        'defaultPosition',
+        'onClose',
+        'onMinimize',
+        'noMinimize'
     ],
 
     data () {

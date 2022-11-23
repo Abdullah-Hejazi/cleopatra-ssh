@@ -1,15 +1,10 @@
 <template>
-    <Window :title="$t('folder.browser')" icon="/folder.png" :defaultSize="{width: 850, height: 500}">
+    <Window :onClose="Cancel" :noMinimize="true" :title="$t('filedialog.title')" icon="/folder.png" :defaultSize="{width: 650, height: 400}" defaultLocation="center">
         <div class="path-bar">
             <div class="path flex">
                 <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
                 <div class="flex-grow-1 p-0 mr-3">
                     <InputText spellcheck="false" @focus="pathFocused = true" @blur="pathFocused = false" type="text" v-model="pathInput" class="path-input w-full" @change="Load(pathInput)" />
-                </div>
-
-                <div class="path-controls p-0">
-                    <Button icon="pi pi-cog" class="mr-1 p-button-text" @click="Options" v-tooltip.bottom="$t('folder.options')"></Button>
-                    <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
                 </div>
             </div>
         </div>
@@ -22,164 +17,66 @@
                 </div>
             </div>
 
-            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length" @contextmenu="Options">
+            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length">
                 <ScrollPanel style="width: 100%; height: 100%">
                     <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
-                        <div @contextmenu="OnContextMenu($event, index)" :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
+                        <div :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
                             <i :class="(folder.directory) ? 'pi pi-folder' : 'pi pi-file'" style="font-size: 1rem"></i>
                             <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
                         </div>
                     </div>
                 </ScrollPanel>
-
-                <ContextMenu ref="foldermenu" :model="folderContextMenuItems" />
-                <ContextMenu ref="filemenu" :model="fileContextMenuItems" />
-                <ContextMenu ref="multimenu" :model="multiFileContextMenuItems" />
             </div>
 
             <div class="w-full text-center flex " v-if="loading">
                 <ProgressSpinner class="h-full" />
             </div>
 
-            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error" @contextmenu="Options">
+            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error">
                 {{ $t('folder.emptyfolder') }}
-            </div>
-
-            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="error">
-                {{ error }} . <span class="text-primary cursor-pointer" @click="Load(currentPath)">{{ $t('folder.clear') }}</span>
             </div>
         </div>
 
-        <Dialog :header="$t('folder.newfile')" v-model:visible="newFile.visible" class="display-name-dialog" :modal="true">
-            <div class="p-text-secondary">
-                <InputText :placeholder="$t('folder.filename')" v-model="newFile.name" class="w-full mt-3" />
-
-                <Checkbox v-model="newFile.directory" :binary="true" class="mt-3" />
-                <span class="ml-2">{{ $t('folder.directory') }}</span>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-content-center">
-                    <Button :label="$t('folder.create')" @click="CreateFile" />
-                </div>
-            </template>
-        </Dialog>
-
-        <Dialog :header="$t('folder.downloading')" v-model:visible="download.visible" class="display-name-dialog" :modal="true">
-            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(download.items).length">
-                <template v-for="downloadItem in download.items">
-                    <div  class="my-2" v-if="downloadItem">
-                        <div class="mb-1">{{ downloadItem.name }}</div>
-                        <ProgressBar :value="downloadItem.value" :showValue="false" />
-                    </div>
-                </template>
-            </ScrollPanel>
-
-            <div class="p-5 text-center text-primary" v-else>
-                <div class="pi pi-check-circle" style="font-size: 3rem"></div>
-                <div class="mt-3">{{ $t('folder.downloaded') }}</div>
-            </div>
-        </Dialog>
-
-        <Dialog :header="$t('folder.uploading')" v-model:visible="upload.visible" class="display-name-dialog" :modal="true">
-            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(upload.items).length">
-                <template v-for="uploadItem in upload.items">
-                    <div  class="my-2" v-if="uploadItem">
-                        <div class="mb-1">{{ uploadItem.name }}</div>
-                        <ProgressBar :value="uploadItem.value" :showValue="false" />
-                    </div>
-                </template>
-            </ScrollPanel>
-
-            <div class="p-5 text-center text-primary" v-else>
-                <div class="pi pi-check-circle" style="font-size: 3rem"></div>
-                <div class="mt-3">{{ $t('folder.uploaded') }}</div>
-            </div>
-        </Dialog>
-
-        <Dialog :header="$t('folder.rename')" v-model:visible="rename.visible" class="display-name-dialog" :modal="true">
-            <div class="p-text-secondary">
-                <InputText :placeholder="files[rename.index].name" v-model="rename.name" class="w-full mt-3" />
-            </div>
-
-            <template #footer>
-                <div class="flex justify-content-center">
-                    <Button :label="$t('folder.rename')" @click="Rename" />
-                </div>
-            </template>
-        </Dialog>
-
-        <Dialog :header="$t('folder.chmod')" v-model:visible="permissions.visible" class="display-name-dialog" :modal="true">
-            <div>
-                <div :class="'text-center text-lg py-2 px-3 border-round surface-section mb-4 ' + ((selected.length > 1) ? 'text-primary' : '')">
-                    {{ permissions.name}}
-                </div>
-
-                <table class="text-center mb-3">
-                    <thead>
-                        <tr>
-                            <th> </th>
-                            <th class="px-3 pb-2">{{ $t('folder.owner') }}</th>
-                            <th class="px-3 pb-2">{{ $t('folder.group') }}</th>
-                            <th class="px-3 pb-2">{{ $t('folder.other') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="text-bold pb-2">{{ $t('folder.read') }}</td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][0]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][1]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][2]" :binary="true" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold pb-2">{{ $t('folder.write') }}</td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][0]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][1]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][2]" :binary="true" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold pb-2">{{ $t('folder.exec') }}</td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][0]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][1]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][2]" :binary="true" /></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="text-center text-5xl">
-                    {{ permissions.value }}
-                </div>
-
-                <div class="text-center text-secondary mt-4">
-                    <Checkbox v-model="permissions.recursive" :binary="true" />
-                    <span class="text-bold ml-2">{{ $t('folder.recursive') }}</span>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-content-center">
-                    <Button :label="$t('folder.chmod')" @click="ChangePermissionsConfirm" />
-                </div>
-            </template>
-        </Dialog>
+        <div class="file-confirm flex justify-content-between p-2">
+            <Button :label="$t('filedialog.cancel')" class="p-button-text p-button-sm" @click="Cancel"></Button>
+            <Button :label="$t('filedialog.select')" class="p-button-sm" @click="Select"></Button>
+        </div>
     </Window>
 </template>
 
 <script>
 import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
-import Clipboard from '@/services/clipboard'
-
-const { ipcRenderer } = require('electron')
-var pathLib = require('path')
 
 import Window from '@/components/windows/Window'
 
 export default {
-    name: 'FolderBrowser',
+    name: 'FileDialog',
 
     components: {
         Window
+    },
+
+    props: {
+        multiple: {
+            type: Boolean,
+            default: false
+        },
+        
+        type: {
+            type: String,
+            default: 'files'
+        },
+
+        Finish: {
+            type: Function,
+            default: () => {}
+        },
+
+        Cancel: {
+            type: Function,
+            default: () => {}
+        }
     },
 
     data () {
@@ -207,205 +104,7 @@ export default {
             pathInput: Helpers.GetHomeDirectory(),
             pathFocused: false,
 
-            newFile: {
-                visible: false,
-                name: '',
-                directory: false
-            },
-
-            folderContextMenuItems: [
-                {
-					label: this.$t('folder.open'),
-					icon: 'pi pi-folder-open',
-                    command: () => this.LoadItem(this.files[this.selected[0]])
-                },
-                {
-					label: this.$t('folder.download'),
-					icon: 'pi pi-download',
-                    command: this.Download
-                },
-                {
-                    separator: true
-                },
-                {
-					label: this.$t('folder.copy'),
-					icon: 'pi pi-copy',
-                    command: this.Copy
-                },
-                {
-					label: this.$t('folder.cut'),
-					icon: 'pi pi-clone',
-                    command: this.Cut
-                },
-                {
-                    separator: true
-                },
-                {
-					label: this.$t('folder.rename'),
-					icon: 'pi pi-pencil',
-                    command: this.RenameDialog
-                },
-                {
-					label: this.$t('folder.delete'),
-					icon: 'pi pi-trash',
-                    command: this.DeleteConfirm
-                },
-                {
-					label: this.$t('folder.permissions'),
-					icon: 'pi pi-cog',
-                    command: this.ChangePermissionsDialog
-                }
-            ],
-
-            fileContextMenuItems: [
-                {
-					label: this.$t('folder.edit'),
-					icon: 'pi pi-file'
-                },
-                {
-					label: this.$t('folder.download'),
-					icon: 'pi pi-download',
-                    command: this.Download
-                },
-                {
-					label: this.$t('folder.execute'),
-					icon: 'pi pi-dollar'
-                },
-                {
-                    separator: true
-                },
-                {
-					label: this.$t('folder.copy'),
-					icon: 'pi pi-copy',
-                    command: this.Copy
-                },
-                {
-					label: this.$t('folder.cut'),
-					icon: 'pi pi-clone',
-                    command: this.Cut
-                },
-                {
-                    separator: true
-                },
-                {
-					label: this.$t('folder.rename'),
-					icon: 'pi pi-pencil',
-                    command: this.RenameDialog
-                },
-                {
-					label: this.$t('folder.delete'),
-					icon: 'pi pi-trash',
-                    command: this.DeleteConfirm
-                },
-                {
-					label: this.$t('folder.permissions'),
-					icon: 'pi pi-cog',
-                    command: this.ChangePermissionsDialog
-                }
-            ],
-
-            multiFileContextMenuItems: [
-                {
-					label: this.$t('folder.download'),
-					icon: 'pi pi-download',
-                    command: this.Download
-                },
-                {
-                    separator: true
-                },
-                {
-					label: this.$t('folder.copy'),
-					icon: 'pi pi-copy',
-                    command: this.Copy
-                },
-                {
-					label: this.$t('folder.cut'),
-					icon: 'pi pi-clone',
-                    command: this.Cut
-                },
-                {
-                    separator: true
-                },
-                {
-					label: this.$t('folder.delete'),
-					icon: 'pi pi-trash',
-                    command: this.DeleteConfirm
-                },
-                {
-					label: this.$t('folder.permissions'),
-					icon: 'pi pi-cog',
-                    command: this.ChangePermissionsDialog
-                }
-            ],
-
-            optionsContextMenuItems: [
-                {
-                    label: this.$t('folder.newfile'),
-                    icon: 'pi pi-file',
-                    command: () => this.NewFile(false)
-                },
-                {
-                    label: this.$t('folder.upload'),
-                    icon: 'pi pi-upload',
-                    items: [
-                        {
-                            label: this.$t('folder.uploadfolder'),
-                            icon: 'pi pi-folder-open',
-                            command: () => this.Upload(true)
-                        },
-                        {
-                            label: this.$t('folder.uploadfile'),
-                            icon: 'pi pi-file',
-                            command: () => this.Upload(false)
-                        },
-                    ]
-                },
-                {
-                    label: this.$t('folder.refresh'),
-                    icon: 'pi pi-refresh',
-                    command: () => this.Load(this.currentPath)
-                },
-                {
-                    label: this.$t('folder.paste'),
-                    icon: 'pi pi-copy',
-                    command: this.Paste
-                }
-            ],
-
-            selected: [],
-
-            download: {
-                visible: false,
-                items: {}
-            },
-
-            upload: {
-                visible: false,
-                items: {}
-            },
-
-            permissions: {
-                visible: false,
-                items: [
-                    [false, false, false],
-                    [false, false, false],
-                    [false, false, false]
-                ],
-                value: '0 0 0',
-                name: 'test',
-                recursive: false
-            },
-
-            rename: {
-                visible: false,
-                name: '',
-                index: 0
-            },
-
-            copying: 0,
-            deleting: 0,
-            moving: 0,
-            changingPermissions: 0
+            selected: []
         }
     },
 
@@ -421,12 +120,17 @@ export default {
             this.selected = []
 
             SSHClient.List(path).then((result) => {
-                this.files = Helpers.ParseDirectory(result).sort((a, b) => {
+                let data = Helpers.ParseDirectory(result).sort((a, b) => {
                     if (a.directory && !b.directory)        return -1
                     else if (!a.directory && b.directory)   return 1
 
                     return 0
                 })
+
+                this.files = (this.type === 'folders') ? data.filter((item) => {
+                    return item.directory
+                }) : data
+
 
                 this.currentPath = path
                 this.UpdateSideBarItem()
@@ -463,7 +167,7 @@ export default {
         },
 
         SelectItem (index) {
-            if (window.event.ctrlKey) {
+            if (window.event.ctrlKey && this.multiple) {
                 if (this.selected.includes(index)) {
                     this.selected.splice(this.selected.indexOf(index), 1)
                 } else {
@@ -472,7 +176,7 @@ export default {
                 return
             }
 
-            if (window.event.shiftKey) {
+            if (window.event.shiftKey && this.multiple) {
                 if (this.selected.length === 0) {
                     this.selected.push(index)
                     return
@@ -544,455 +248,37 @@ export default {
             this.Load(path)
         },
 
-        NewFile () {
-            this.newFile.name = ''
-            this.newFile.visible = true
-        },
-
-        CreateFile () {
-            if (this.newFile.name.length === 0) {
+        Select () {
+            if (this.selected.length === 0) {
+                this.Finish(this.currentPath)
                 return
             }
 
-            let file = this.currentPath + '/' + this.newFile.name
-
-            if (this.newFile.directory) {
-                SSHClient.CreateDirectory(file).then(() => {
-                    this.Load(this.currentPath)
-                }).catch((err) => {
-                    this.error = err
-                }).finally(() => {
-                    this.newFile.visible = false
-                })
-            } else {
-                SSHClient.FileExists(file).then((res) => {
-                    if (res == 1) {
-                        this.error = this.$t('folder.exists')
-                        this.newFile.visible = false
-                    } else {
-                        this.ExecuteCreateFile(file)
-                    }
-                }).catch((err) => {
-                    this.error = err
-                })
-            }
-        },
-
-        ExecuteCreateFile (file) {
-            SSHClient.CreateFile(file).then(() => {
-                this.Load(this.currentPath)
-            }).catch((err) => {
-                this.error = err
-            }).finally(() => {
-                this.newFile.visible = false
-            })
-        },
-
-        OnContextMenu (event, index) {
-            this.$refs.optionsmenu.hide()
-            
-            if (! this.selected.includes(index)) {
-                this.ClearSelected()
-                this.SelectItem(index)
-            }
-
-            if (this.selected.length > 1) {
-                this.$refs.multimenu.show(event)
-                return
-            }
-            
-            if (this.files[index].directory) {
-                this.$refs.filemenu.hide()
-                this.$refs.foldermenu.show(event)
-            } else {
-                this.$refs.foldermenu.hide()
-                this.$refs.filemenu.show(event)
-            }
-        },
-
-        Download () {
-            let file = ipcRenderer.sendSync('select-folder')
-
-            if (! file) return
-
-            this.selected.forEach((index) => {
-                let localPath = file + '/' + this.files[index].name
-
-                if (this.files[index].directory) {
-                    this.DownloadDirectory(this.files[index].name, localPath)
-                } else {
-                    this.DownloadFile(this.files[index].name, localPath)
-                }
-
-                
-            })
-        },
-
-        DownloadFile (file, destination) {
-            let source = this.currentPath + '/' + file
-
-            let uid = Helpers.GetRandomString()
-
-            this.download.visible = true
-
-            this.download.items[uid] = {
-                name: file,
-                value: 0
-            }
-
-            SSHClient.Download(source, destination, {
-                step: (transferred, chunk, total) => {
-                    if (this.download.items[uid]) {
-                        this.download.items[uid].value = (transferred * 100) / total
-                    }
-                }
-            })
-            .catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.downloadfailed') + ': ' + source, detail: err, life: 6000});
-            })
-            .finally(() => {
-                delete this.download.items[uid]
-            })
-        },
-
-        async DownloadDirectory(directory, destination) {
-            let result = await SSHClient.ListNested(this.currentPath + '/' + directory)
-
-            if (! result) return
-
-            let files = result.split('\n').sort((a, b) => {
-                let isDirectoryA = a.substring(0, 1) === 'd'
-                let isDirectoryB = b.substring(0, 1) === 'd'
-
-                if (isDirectoryA && ! isDirectoryB) return -1
-                if (! isDirectoryA && isDirectoryB) return 1
-
-                return 0
-            })
-
-            files[0] += directory
-            
-            files.forEach((file) => {
-                let isDirectory = file.substring(0, 1) === 'd'
-                let filename = file.substring(2)
-
-                if (! filename) return
-
-                if (isDirectory) {
-                    Helpers.MakeDirectory(destination + '/' + filename)
-                } else {
-                    this.DownloadFile(directory + '/' + filename, destination + '/' + filename)
-                }
-            })
-        },
-
-        UploadContextMenu (event) {
-            this.$refs.uploadmenu.show(event)
-        },
-
-        Upload (directory) {
-            let files = null
-
-            if (directory) {
-                files = ipcRenderer.sendSync('select-multi-directory')
-            } else {
-                files = ipcRenderer.sendSync('select-multi-file')
-            }
-
-            if (! files) return
-
-            files.forEach((file) => {
-                let destination = pathLib.basename(file)
-
-                if (directory) {
-                    this.UploadDirectory(Helpers.ListDirectory(file), destination)
-                } else {
-                    this.UploadFile(file, destination)
-                }
-            })
-        },
-
-        UploadFile (source, file) {
-            let destination = this.currentPath + '/' + file
-
-            let uid = Helpers.GetRandomString()
-
-            this.upload.visible = true
-
-            this.upload.items[uid] = {
-                name: file,
-                value: 0
-            }
-
-            SSHClient.Upload(source, destination, {
-                step: (transferred, chunk, total) => {
-                    if (this.upload.items[uid]) {
-                        this.upload.items[uid].value = (transferred * 100) / total
-                    }
-                }
-            })
-            .catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.uploadfailed') + ': ' + source, detail: err, life: 6000});
-            })
-            .finally(() => {
-                delete this.upload.items[uid]
-
-                if (Object.keys(this.upload.items).length === 0) {
-                    this.Load(this.currentPath)
-                }
-            })
-        },
-
-        UploadDirectory (items, file) {
-            SSHClient.CreateDirectory(this.currentPath + '/' + file).then(() => {
-                items.forEach((item) => {
-                    if (item.directory) {
-                        this.UploadDirectory(item.items, file + '/' + item.name)
-                    } else {
-                        this.UploadFile(item.path, file + '/' + item.name)
-                    }
-                })
-            }).catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.uploadfailed') + ': ' + file, detail: err, life: 6000});
-            })
-        },
-
-        RenameDialog () {
-            if (this.selected.length !== 1) return
-
-            this.rename.name = ''
-            this.rename.visible = true
-            this.rename.index = this.selected[0]
-        },
-
-        Rename () {
-            let file = this.files[this.rename.index].name
-
-            if (file === this.rename.name) {
-                this.rename.visible = false
+            if (! this.multiple) {
+                this.Finish(this.files[this.selected[0]])
                 return
             }
 
-            SSHClient.Move(this.currentPath + '/' + file, this.currentPath + '/' + this.rename.name).then(() => {
-                this.Load(this.currentPath)
-            }).catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.renamefailed') + ': ' + file, detail: err, life: 6000});
-            }).finally(() => {
-                this.rename.visible = false
-            })
-        },
-
-        DeleteConfirm () {
-            if (this.selected.length === 0) return
-
-            this.$confirm.require({
-                message: this.$t('folder.deleteconfirmtext') + this.selected.length + this.$t('folder.deletefiles'),
-                header: this.$t('folder.deleteconfirmtitle'),
-                icon: 'pi pi-exclamation-triangle',
-                accept: () => {
-                    this.Delete()
-                }
-            });
-        },
-
-        Delete () {
-            this.deleting = this.selected.length
-            this.selected.forEach((index) => {
-                let file = this.files[index].name
-
-                this.DeleteFile(file)
-            })
-        },
-
-        DeleteFile(file) {
-            SSHClient.Delete(this.currentPath + '/' + file)
-            .catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.deletefailed') + ': ' + file, detail: err, life: 6000});
-            }).finally(() => {
-                this.deleting--
-
-                if (this.deleting === 0) {
-                    this.Load(this.currentPath)
-                }
-            })
-        },
-
-        Options (event) {
-            this.$refs?.filemenu?.hide()
-            this.$refs?.foldermenu?.hide()
-            this.$refs?.multimenu?.hide()
-
-            this.selected = []
-
-            this.$refs.optionsmenu.show(event)
-        },
-
-        Copy () {
-            if (this.selected.length === 0) return
-
-            this.clipboardData = {
-                type: 'copy',
-                path: this.currentPath,
-                files: []
-            }
-            
+            let output = []
 
             this.selected.forEach((index) => {
-                let file = this.files[index]
-
-                this.clipboardData.files.push({
-                    name: file.name,
-                    directory: file.directory
-                })
+                output.push(this.files[index])
             })
 
-            Clipboard.Set(this.clipboardData)
-        },
-
-        CopyFile (clipBoardData, file) {
-            SSHClient.Copy(clipBoardData.path + '/' + file.name, this.currentPath + '/' + file.name, file.directory)
-            .catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.copyfailed') + ': ' + file.name, detail: err, life: 6000});
-            }).finally(() => {
-                this.copying--
-
-                if (this.copying === 0) {
-                    this.Load(this.currentPath)
-                }
-            })
-        },
-
-        Cut () {
-            if (this.selected.length === 0) return
-
-            this.clipboardData = {
-                type: 'cut',
-                path: this.currentPath,
-                files: []
-            }
-            
-
-            this.selected.forEach((index) => {
-                let file = this.files[index]
-
-                this.clipboardData.files.push({
-                    name: file.name,
-                    directory: file.directory
-                })
-            })
-
-            Clipboard.Set(this.clipboardData)
-        },
-
-        CutFile (clipBoardData, file) {
-            SSHClient.Move(clipBoardData.path + '/' + file.name, this.currentPath + '/' + file.name)
-            .catch((err) => {
-                this.$toast.add({severity:'error', summary: this.$t('folder.cutfailed') + ': ' + file.name, detail: err, life: 6000});
-            }).finally(() => {
-                this.moving--
-
-                if (this.moving === 0) {
-                    this.Load(this.currentPath)
-                }
-            })
-        },
-
-        Paste () {
-            let clipBoardData = Clipboard.Get()
-
-            if (Clipboard.IsEmpty()) {
-                this.$toast.add({severity:'error', summary: this.$t('folder.clipboardempty'), life: 6000});
-                return
-            }
-
-            if (clipBoardData.path === this.currentPath) {
-                this.$toast.add({severity:'error', summary: this.$t('folder.pasteerror'), detail: this.$t('folder.clipboardsamedir'), life: 6000});
-                return
-            }
-
-            if (clipBoardData.action === 'copy') {
-                this.copying = clipBoardData.files.length
-            } else {
-                this.moving = clipBoardData.files.length
-            }
-
-            clipBoardData.files.forEach((file) => {
-                if (clipBoardData.action === 'copy') {
-                    this.CopyFile(clipBoardData, file)
-                } else {
-                    this.CutFile(clipBoardData, file)
-                }
-            })
-        },
-
-        ChangePermissionsDialog () {
-            if (this.selected.length === 0) return
-
-            if (this.selected.length === 1) {
-                this.permissions.name = this.files[this.selected[0]].name
-
-                this.permissions.items = Helpers.PermissionFromString(this.files[this.selected[0]].permissions)
-            } else {
-                this.permissions.name = this.selected.length + this.$t('folder.files')
-                this.permissions.items = [
-                    [false, false, false],
-                    [false, false, false],
-                    [false, false, false]
-                ]
-            }
-
-            this.OnPermissionCheckboxChange()
-
-            this.permissions.visible = true
-        },
-
-        OnPermissionCheckboxChange () {
-            let p = Helpers.PermissionFromArray(this.permissions.items)
-
-            this.permissions.value = p[0] + ' ' + p[1] + ' ' + p[2]
-        },
-
-        ChangePermissionsConfirm () {
-            this.$confirm.require({
-                message: this.$t('folder.changepermissionconfirmtext') + this.selected.length + this.$t('folder.files') + this.$t('folder.to') + '(' + this.permissions.value + ')',
-                header: this.$t('folder.changepermissionconfirm'),
-                icon: 'pi pi-exclamation-triangle',
-                accept: () => {
-                    this.ChangePermissions()
-                }
-            })
-        },
-
-        ChangePermissions () {
-            this.changingPermissions = this.selected.length
-
-            this.selected.forEach((index) => {
-                let file = this.files[index].name
-
-                SSHClient.ChangePermissions(this.currentPath + '/' + file, Helpers.PermissionFromArray(this.permissions.items), this.permissions.recursive)
-                .catch((err) => {
-                    this.$toast.add({severity:'error', summary: this.$t('folder.changepermissionfailed') + ': ' + file, detail: err, life: 6000});
-                }).finally(() => {
-                    this.changingPermissions--
-
-                    if (this.changingPermissions === 0) {
-                        this.Load(this.currentPath)
-                        this.permissions.visible = false
-                    }
-                })
-            })
-        },
+            this.Finish(output)
+            return
+        }
     }
 }
 </script>
 
-<style>
+<style scoped>
     .unselectable-text {
         user-select: none;
     }
 
     .folder-browser-window {
-        height: calc(100% - 85px);
+        height: calc(100% - 150px);
     }
 
     .side-bar {
@@ -1011,11 +297,6 @@ export default {
 
     .side-bar-item:hover {
         background-color: rgba(255, 255, 255, 0.055);
-    }
-
-    .main-content {
-        width: calc(100% - 250px);
-        margin-top: 10px;
     }
 
     .main-content-item {
@@ -1072,5 +353,11 @@ export default {
         background-color: #00000049 !important;
         color: white;
         font-size: 1rem;
+    }
+
+    .file-confirm {
+        background-color: #00000049 !important;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
     }
 </style>
