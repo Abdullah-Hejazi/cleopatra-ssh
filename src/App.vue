@@ -10,11 +10,10 @@
             <ProgressSpinner strokeWidth="3" class="cleopatra-ssh-loading-module-spinner" />
         </p>
 
-        <ScrollPanel class="scrollbar-themed">
-            <div>
-                <RouterView />
-            </div>
-        </ScrollPanel>
+        <div>
+            <div class="topbar-placeholder"></div>
+            <RouterView />
+        </div>
 
         <Dialog class="settings-dialog" :header="$t('general.settings')" v-model:visible="settings" :modal="true">
             <div>
@@ -132,6 +131,15 @@ body {
     margin-top: 55px;
     width: 100%;
     height: calc(100vh - 63px);
+}
+
+.p-scrollpanel-content {
+    padding: 0px;
+}
+
+.topbar-placeholder {
+    height: 55px;
+    width: 100px;
 }
 
 </style>

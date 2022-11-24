@@ -184,6 +184,8 @@ export default {
     .terminal-input {
         background-color: #00000000 !important;
         border: none;
+        font-family: monospace;
+        white-space: pre;
     }
 
     .terminal-input:focus {

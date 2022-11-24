@@ -56,7 +56,7 @@ export default {
 
 <style>
     .title-bar {
-        position: absolute;
+        position: fixed;
         top: 0px;
         left: 0px;
         width: 100%;
@@ -64,6 +64,7 @@ export default {
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        z-index: 9999999999;
     }
 
     .drag-bar {

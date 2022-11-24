@@ -141,7 +141,7 @@ export default {
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
-        height: calc(100vh - 65px);
+        height: calc(100vh - 55px);
         width: 100%;
     }
 
