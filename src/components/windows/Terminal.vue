@@ -1,13 +1,15 @@
 <template>
     <div>
         <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="CloseTerminal" :onMinimize="onMinimize" :title="$t('general.Terminal')" icon="/terminal.png" :defaultSize="{width: 700, height: 400}">
-            <div class="terminal flex flex-column" @focus="TerminalFocus" ref="terminalcontainer">
+            <div class="terminal flex flex-column" @focus="TerminalFocus" ref="terminalcontainer" @contextmenu="OptionsMenu">
                 <div>
                     <pre class="terminal-line flex m-0 my-1" v-for="line, index in lines.slice(0, lines.length - 1)" :key="index">{{line}}<span class="flex-grow-1" @click="TerminalFocus"><input v-if="index+1 === lines.length" type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
                     <pre class="terminal-line flex m-0 my-1">{{lines[lines.length-1]}}<span class="flex-grow-1" @click="TerminalFocus"><input type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
                 </div>
                 <div @click="TerminalFocus" class="flex-grow-1"></div>
             </div>
+
+            <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
         </Window>
     </div>
 </template>
@@ -56,7 +58,20 @@ export default {
         return {
             socket: null,
             lines: [],
-            command: ''
+            command: '',
+
+            optionsContextMenuItems: [
+                {
+                    label: this.$t('terminal.copy'),
+                    icon: 'pi pi-copy',
+                    command: this.Copy
+                },
+                {
+                    label: this.$t('terminal.paste'),
+                    icon: 'pi pi-copy',
+                    command: this.Paste
+                }
+            ],
         }
     },
 
@@ -116,11 +131,26 @@ export default {
 
                 this.$refs.terminalcontainer.scrollTo(0, this.$refs.terminalcontainer.scrollHeight)
             }
+        },
+
+        OptionsMenu (event) {
+            this.$refs.optionsmenu.show(event)
+        },
+
+        Copy () {
+            const selection = window.getSelection()
+
+            navigator.clipboard.writeText(selection.toString())
+        },
+
+        Paste () {
+            navigator.clipboard.readText().then((text) => {
+                this.command += text
+            })
         }
     },
 
     watch: {
-        // watch lines length
         lines: {
             handler () {
                 this.$nextTick(() => {

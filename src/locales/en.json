@@ -132,5 +132,7 @@
     },
 
     "terminal": {
+        "copy": "Copy",
+        "paste": "Paste"
     }
 }
