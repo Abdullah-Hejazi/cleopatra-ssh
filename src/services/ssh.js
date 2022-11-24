@@ -1,5 +1,4 @@
 var SSH2Promise = require('ssh2-promise')
-const { readFileSync } = require('fs')
 
 let sshSession = null
 let sshFtp = null
@@ -11,6 +10,7 @@ export default {
             await sshSession.close()
 			sshSession = null
 			sshFtp = null
+			sshUser = {}
         }
 
 		if (account.authType.value === 'password') {
@@ -44,6 +44,7 @@ export default {
 		}
 		sshSession = null
 		sshFtp = null
+		sshUser = {}
 	},
 
 	GetCurrentUser: () => {
