@@ -1,7 +1,7 @@
 <template>
     <div>
         <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="CloseTerminal" :onMinimize="onMinimize" :title="$t('general.Terminal')" icon="/terminal.png" :defaultSize="{width: 700, height: 400}">
-            <div class="terminal flex flex-column" @focus="TerminalFocus" ref="terminalcontainer" @contextmenu="OptionsMenu">
+            <div class="terminal flex flex-column selectable-text" @focus="TerminalFocus" ref="terminalcontainer" @contextmenu="OptionsMenu">
                 <div>
                     <pre class="terminal-line flex m-0 my-1" v-for="line, index in lines.slice(0, lines.length - 1)" :key="index">{{line}}<span class="flex-grow-1" @click="TerminalFocus"><input v-if="index+1 === lines.length" type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
                     <pre class="terminal-line flex m-0 my-1">{{lines[lines.length-1]}}<span class="flex-grow-1" @click="TerminalFocus"><input type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>

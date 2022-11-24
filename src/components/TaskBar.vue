@@ -56,5 +56,9 @@ export default {
         padding: 5px 30px 5px 30px;
         margin-bottom: 10px;
         z-index: 9999;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 </style>

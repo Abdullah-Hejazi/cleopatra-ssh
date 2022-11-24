@@ -5,11 +5,9 @@
                 <div class="path-bar">
                     <div class="path flex">
                         <div class="ml-2 py-1 px-2 text-gray-200">{{ $t('editor.file') }}</div>
-                        <div class="text-primary file-name py-1 px-2 flex-grow-1">{{ currentFile ? currentFile : $t('editor.newfile') }}</div>
+                        <div class="text-primary file-name py-1 px-2 flex-grow-1 selectable-text">{{ currentFile ? currentFile : $t('editor.newfile') }}</div>
 
                         <Button icon="pi pi-angle-down" class="mr-1 p-button-text py-1" :label="$t('editor.filemenu')" @click="Options"></Button>
-
-                        <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
                     </div>
                 </div>
             </div>
@@ -51,6 +49,7 @@
             </div>
         </Modal>
 
+        <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
         <FileDialog v-if="saveAs.fileDialog" type="folders" :Finish="SetPath" :Cancel="CancelDialog" />
 
         <FileDialog v-if="openDialog" type="files" :Finish="OpenFile" :Cancel="CancelOpenDialog" />
@@ -289,10 +288,6 @@ export default {
 </script>
 
 <style>
-    .unselectable-text {
-        user-select: none;
-    }
-
     .path-bar {
         margin: 5px;
         padding: 5px;

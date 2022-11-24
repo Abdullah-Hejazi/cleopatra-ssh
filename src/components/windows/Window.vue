@@ -13,7 +13,7 @@
         </div>
 
         <div class="window-content">
-            <slot />
+            <slot></slot>
         </div>
 
         <div class="window-resize-control" @mousedown="OnReSizeMouseDown" @mouseup="OnReSizeMouseUp" />
@@ -89,9 +89,9 @@ export default {
     },
 
     mounted () {
-        this.$el.addEventListener("mousemove", this.OnMouseMove)
+        window.addEventListener("mousemove", this.OnMouseMove)
 
-        this.$el.addEventListener("mouseup", () => {
+        window.addEventListener("mouseup", () => {
             this.OnRePositionMouseUp()
             this.OnReSizeMouseUp()
         })
@@ -128,9 +128,9 @@ export default {
     },
 
     beforeDestroy () {
-        this.$el.removeEventListener("mousemove", this.OnMouseMove)
-        this.$el.removeEventListener("mouseup", this.OnRePositionMouseUp)
-        this.$el.removeEventListener("mouseup", this.OnReSizeMouseUp)
+        window.removeEventListener("mousemove", this.OnMouseMove)
+        window.removeEventListener("mouseup", this.OnRePositionMouseUp)
+        window.removeEventListener("mouseup", this.OnReSizeMouseUp)
     },
 
     methods: {
@@ -170,24 +170,27 @@ export default {
                     top: this.mouseY - this.mouseDistance.y
                 }
 
-                this.CheckDraggingConstraints()
+                this.CheckRepositioningConstraints()
+
                 return
             }
 
             if (this.resize && !this.maximized) {
                 this.size = {
                     width: this.mouseX - this.position.left + 15,
-                    height: this.mouseY - this.position.top - 40,
+                    height: this.mouseY - this.position.top + 15,
                     widthUnit: 'px',
                     heightUnit: 'px'
                 }
+
+                this.CheckResizingConstraints()
 
                 return
             }
             
         },
 
-        CheckDraggingConstraints () {
+        CheckRepositioningConstraints () {
             if (this.mouseX - this.mouseDistance.x < 0) {
                 this.position.left = 0
             } else if (this.mouseX - this.mouseDistance.x > window.innerWidth - this.size.width) {
@@ -198,6 +201,20 @@ export default {
                 this.position.top = 55
             } else if (this.mouseY - this.mouseDistance.y > window.innerHeight - this.size.height) {
                 this.position.top = window.innerHeight - this.size.height
+            }
+        },
+
+        CheckResizingConstraints () {
+            if (this.mouseX - this.position.left < 400 + 15) {
+                this.size.width = 400 + 15
+            } else if (this.mouseX - this.position.left > window.innerWidth - this.position.left) {
+                this.size.width = window.innerWidth - this.position.left
+            }
+
+            if (this.mouseY - this.position.top < 350) {
+                this.size.height = 350
+            } else if (this.mouseY - this.position.top > window.innerHeight - this.position.top) {
+                this.size.height = window.innerHeight - this.position.top
             }
         },
 
@@ -260,6 +277,11 @@ export default {
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         border-radius: 10px;
         padding: 0px;
+
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
     }
 
     .window-title-bar {

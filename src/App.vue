@@ -93,54 +93,72 @@ export default {
 </script>
 
 <style>
-body {
-    background-color: var(--surface-ground);
-    font-family: var(--font-family);
-    font-weight: 400;
-    color: var(--text-color);
-    margin: 0px;
-    overflow: hidden;
-}
+    body {
+        background-color: var(--surface-ground);
+        font-family: var(--font-family);
+        font-weight: 400;
+        color: var(--text-color);
+        margin: 0px;
+        overflow: hidden;
+    }
 
-.settings-dialog {
-    width: 400px;
-    max-width: 90vw;
-}
+    .settings-dialog {
+        width: 400px;
+        max-width: 90vw;
+    }
 
-#cleopatra-ssh-loading-module {
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    top: 55px;
-    left: 0px;
-    margin: 0px;
-    padding: 0px;
-    background-color: rgba(0, 0, 0, 0.493);
-    z-index: 9998;
-    display: none;
-}
+    #cleopatra-ssh-loading-module {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 55px;
+        left: 0px;
+        margin: 0px;
+        padding: 0px;
+        background-color: rgba(0, 0, 0, 0.493);
+        z-index: 9998;
+        display: none;
+    }
 
-.cleopatra-ssh-loading-module-spinner {
-    position: fixed;
-    z-index: 9999;
-    top: calc(50vh - 50px);
-    left: calc(50vw - 50px);
-}
+    .cleopatra-ssh-loading-module-spinner {
+        position: fixed;
+        z-index: 9999;
+        top: calc(50vh - 50px);
+        left: calc(50vw - 50px);
+    }
 
 
-.scrollbar-themed {
-    margin-top: 55px;
-    width: 100%;
-    height: calc(100vh - 63px);
-}
+    .scrollbar-themed {
+        margin-top: 55px;
+        width: 100%;
+        height: calc(100vh - 63px);
+    }
 
-.p-scrollpanel-content {
-    padding: 0px;
-}
+    .p-scrollpanel-content {
+        padding: 0px;
+    }
 
-.topbar-placeholder {
-    height: 55px;
-    width: 100px;
-}
+    .topbar-placeholder {
+        height: 55px;
+        width: 100px;
+    }
+
+    .unselectable-text {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .selectable-text {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    .p-contextmenu {
+        z-index: 9999999 !important;
+    }
 
 </style>
