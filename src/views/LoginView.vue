@@ -97,29 +97,33 @@
             </div>
         </div>
 
-        <div class="loginData-card mx-auto surface-card pt-3 shadow-2 border-round mt-3">
-            <div class="text-center">
-                <div class="text-600 text-2xl font-medium">{{ $t('login.savedAccounts') }}</div>
-            </div>
+        <div>
+            <div class="loginData-card mx-auto surface-card pt-3 shadow-2 border-round mt-3">
+                <div class="text-center">
+                    <div class="text-600 text-2xl font-medium">{{ $t('login.savedAccounts') }}</div>
+                </div>
 
-            <div class="px-5">
-                <Divider />
-            </div>
+                <div class="px-5">
+                    <Divider />
+                </div>
 
-            <div class="p-3">
-                <AccountItem
-                    v-for="(account, index) in savedAccounts"
-                    :key="index"
-                    :account="account"
-                    :index="index"
-                    :remove="RemoveAccount"
-                    :load="SelectAccount"
-                />
+                <div class="p-3">
+                    <AccountItem
+                        v-for="(account, index) in savedAccounts"
+                        :key="index"
+                        :account="account"
+                        :index="index"
+                        :remove="RemoveAccount"
+                        :load="SelectAccount"
+                    />
 
-                <div class="text-center text-600 mb-3" v-if="savedAccounts.length == 0">
-                    {{ $t('login.noSavedAccounts') }}
+                    <div class="text-center text-600 mb-3" v-if="savedAccounts.length == 0">
+                        {{ $t('login.noSavedAccounts') }}
+                    </div>
                 </div>
             </div>
+
+            <div class="login-placeholder my-5"></div>
         </div>
 
         <Dialog :header="$t('login.saveAccount')" v-model:visible="displayNameDialog" class="display-name-dialog" :modal="true">
@@ -335,5 +339,10 @@ export default {
 
 .display-name-dialog {
     width: 400px;
+}
+
+.login-placeholder {
+    height: 50px;
+    width: 50px;
 }
 </style>
