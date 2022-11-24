@@ -99,6 +99,7 @@ body {
     font-weight: 400;
     color: var(--text-color);
     margin: 0px;
+    overflow: hidden;
 }
 
 .settings-dialog {

@@ -89,14 +89,9 @@ export default {
     },
 
     mounted () {
-        document.addEventListener("mousemove", (event) => {
-            this.mouseX = event.clientX
-            this.mouseY = event.clientY
+        this.$el.addEventListener("mousemove", this.OnMouseMove)
 
-            this.OnMouseMove()
-        })
-
-        document.addEventListener("mouseup", () => {
+        this.$el.addEventListener("mouseup", () => {
             this.OnRePositionMouseUp()
             this.OnReSizeMouseUp()
         })
@@ -133,9 +128,9 @@ export default {
     },
 
     beforeDestroy () {
-        document.removeEventListener("mousemove", this.OnMouseMove)
-        document.removeEventListener("mouseup", this.OnRePositionMouseUp)
-        document.removeEventListener("mouseup", this.OnReSizeMouseUp)
+        this.$el.removeEventListener("mousemove", this.OnMouseMove)
+        this.$el.removeEventListener("mouseup", this.OnRePositionMouseUp)
+        this.$el.removeEventListener("mouseup", this.OnReSizeMouseUp)
     },
 
     methods: {
@@ -163,7 +158,10 @@ export default {
             this.resize = false
         },
 
-        OnMouseMove() {
+        OnMouseMove(event) {
+            this.mouseX = event.clientX
+            this.mouseY = event.clientY
+
             if (this.draggable && !this.maximized) {
                 this.resize = false
 
@@ -171,6 +169,8 @@ export default {
                     left: this.mouseX - this.mouseDistance.x,
                     top: this.mouseY - this.mouseDistance.y
                 }
+
+                this.CheckDraggingConstraints()
                 return
             }
 
@@ -185,6 +185,20 @@ export default {
                 return
             }
             
+        },
+
+        CheckDraggingConstraints () {
+            if (this.mouseX - this.mouseDistance.x < 0) {
+                this.position.left = 0
+            } else if (this.mouseX - this.mouseDistance.x > window.innerWidth - this.size.width) {
+                this.position.left = window.innerWidth - this.size.width
+            }
+
+            if (this.mouseY - this.mouseDistance.y < 55) {
+                this.position.top = 55
+            } else if (this.mouseY - this.mouseDistance.y > window.innerHeight - this.size.height) {
+                this.position.top = window.innerHeight - this.size.height
+            }
         },
 
         Maximize() {
@@ -206,7 +220,7 @@ export default {
 
                 this.position = {
                     left: 0,
-                    top: 0
+                    top: 55
                 }
 
                 this.size = {
