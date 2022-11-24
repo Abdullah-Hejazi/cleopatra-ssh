@@ -1,128 +1,9 @@
-<script>
-
-import TitleBar from '@/components/TitleBar'
-
-export default {
-    name: 'Cleopatra SSH',
-
-    data() {
-        return {
-            themes: [
-                "arya-blue",
-                "arya-green",
-                "arya-orange",
-                "arya-purple",
-                "bootstrap4-dark-blue",
-                "bootstrap4-dark-purple",
-                "bootstrap4-light-blue",
-                "bootstrap4-light-purple",
-                "fluent-light",
-                "lara-dark-blue",
-                "lara-dark-indigo",
-                "lara-dark-purple",
-                "lara-dark-teal",
-                "lara-light-blue",
-                "lara-light-indigo",
-                "lara-light-purple",
-                "lara-light-teal",
-                "luna-amber",
-                "luna-blue",
-                "luna-green",
-                "luna-pink",
-                "md-dark-deeppurple",
-                "md-dark-indigo",
-                "md-light-deeppurple",
-                "md-light-indigo",
-                "mdc-dark-deeppurple",
-                "mdc-dark-indigo",
-                "mdc-light-deeppurple",
-                "mdc-light-indigo",
-                "nova",
-                "nova-accent",
-                "nova-alt",
-                "nova-vue",
-                "rhea",
-                "saga-blue",
-                "saga-green",
-                "saga-orange",
-                "saga-purple",
-                "tailwind-light",
-                "vela-blue",
-                "vela-green",
-                "vela-orange",
-                "vela-purple"
-            ],
-
-            settings: false,
-            about: false,
-
-            theme: '',
-            language: ''
-        }
-    },
-
-    components: {
-        TitleBar
-    },
-
-    methods: {
-        async SelectTheme() {
-            this.themes.forEach(theme => {
-                document.getElementById(theme).rel = '';
-            })
-
-            document.getElementById(this.theme).rel = 'stylesheet';
-
-            localStorage.setItem('theme', this.theme);
-        },
-
-        SelectLanguage() {
-            if (this.language) {
-                this.$i18n.locale = this.language;
-                localStorage.setItem('language', this.language);
-            }
-        },
-
-        OpenSettings() {
-            this.settings = true
-        }
-    },
-
-    created() {
-        // load language
-        let language = localStorage.getItem('language')
-
-        if (language) {
-            this.language = localStorage.getItem('language');
-            this.SelectLanguage()
-        }
-
-        this.themes.forEach(theme => {
-            let link = document.createElement('link');
-            link.rel = "";
-            link.id = theme;
-            link.href = '/themes/' + theme + '.css';
-            document.head.appendChild(link);
-        })
-
-        let link = document.createElement('link');
-        link.rel = "stylesheet";
-        link.href = 'primeicons.css';
-        document.head.appendChild(link);
-
-        this.theme = localStorage.getItem('theme') ?? 'arya-blue';
-        this.SelectTheme()
-    }
-}
-
-</script>
-
 <template>
     <div>
         <ConfirmDialog />
         <Toast position="bottom-left" />
 
-        <TitleBar :settings="OpenSettings" :about="() => about = true" />
+        <TitleBar :settings="OpenSettings" />
 
 
         <p id="cleopatra-ssh-loading-module">
@@ -137,23 +18,15 @@ export default {
 
         <Dialog class="settings-dialog" :header="$t('general.settings')" v-model:visible="settings" :modal="true">
             <div>
-                <div>
-                    <p class="my-1">{{ $t('general.themes') }}</p>
-                    <Dropdown :placeholder="$t('general.themes')" class="w-full" v-model="theme" :options="themes" @change="SelectTheme" />
-                </div>
-
-                <div class="mt-5">
+                <div class="mt-0">
                     <p class="mb-1">{{ $t('general.language') }}</p>
                     <Dropdown :placeholder="$t('general.language')" class="w-full" v-model="language" :options="$i18n.availableLocales" @change="SelectLanguage" />
                 </div>
             </div>
-        </Dialog>
 
-        <Dialog class="settings-dialog" :header="$t('general.about') + ' Cleopatra SSH'" v-model:visible="about" :modal="true">
-            <div>
-                <div class="mb-5">
-                    Cleopatra SSH is a visual SSH Client.
-                </div>
+            <Divider class="my-5" />
+
+            <div class="text-center">
                 <div>
                     Developed with love by <a class="text-primary" href="https://twitter.com/AbdullahHejazi6" target="_blank">Abdullah Hejazi</a>
                 </div>
@@ -175,6 +48,50 @@ export default {
         </Dialog>
     </div>
 </template>
+
+<script>
+
+import TitleBar from '@/components/TitleBar'
+
+export default {
+    name: 'Cleopatra SSH',
+
+    data() {
+        return {
+            settings: false,
+
+            language: ''
+        }
+    },
+
+    components: {
+        TitleBar
+    },
+
+    methods: {
+        SelectLanguage() {
+            if (this.language) {
+                this.$i18n.locale = this.language;
+                localStorage.setItem('language', this.language);
+            }
+        },
+
+        OpenSettings() {
+            this.settings = true
+        }
+    },
+
+    created() {
+        let language = localStorage.getItem('language')
+
+        if (language) {
+            this.language = localStorage.getItem('language');
+            this.SelectLanguage()
+        }
+    }
+}
+
+</script>
 
 <style>
 body {
