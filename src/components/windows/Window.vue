@@ -89,13 +89,6 @@ export default {
     },
 
     mounted () {
-        window.addEventListener("mousemove", this.OnMouseMove)
-
-        window.addEventListener("mouseup", () => {
-            this.OnRePositionMouseUp()
-            this.OnReSizeMouseUp()
-        })
-
         if (this.defaultSize) {
             this.size = {
                 width: this.defaultSize.width,
@@ -125,6 +118,24 @@ export default {
                 this.previousPosition = this.defaultPosition
             }
         }
+    },
+
+    activated() {
+        window.addEventListener("mousemove", this.OnMouseMove)
+
+        window.addEventListener("mouseup", () => {
+            this.OnRePositionMouseUp()
+            this.OnReSizeMouseUp()
+        })
+    },
+
+    deactivated() {
+        window.removeEventListener("mousemove", this.OnMouseMove)
+
+        window.removeEventListener("mouseup", () => {
+            this.OnRePositionMouseUp()
+            this.OnReSizeMouseUp()
+        })
     },
 
     beforeDestroy () {
