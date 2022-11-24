@@ -42,13 +42,13 @@ export default {
     data () {
         return {
             position: {
-                top: 50 + Math.random() * (100 - 0),
-                left: 50 + Math.random() * (100 - 0)
+                top: 55 + 10,
+                left: 20
             },
 
             previousPosition: {
-                top: 50,
-                left: 50
+                top: 58,
+                left: 58
             },
 
             mouseX: 50,
@@ -63,7 +63,7 @@ export default {
             maximized: false,
 
             size: {
-                width: 720,
+                width: 400,
                 height: 400,
                 unit: 'px'
             },
@@ -91,8 +91,8 @@ export default {
     mounted () {
         if (this.defaultSize) {
             this.size = {
-                width: this.defaultSize.width,
-                height: this.defaultSize.height,
+                width: this.defaultSize.width > window.innerWidth - 50 ? window.innerWidth - 50 : this.defaultSize.width,
+                height: this.defaultSize.height > window.innerHeight - 50 ? window.innerHeight - 50 : this.defaultSize.height,
                 widthUnit: 'px',
                 heightUnit: 'px',
             }
@@ -123,6 +123,8 @@ export default {
     activated() {
         window.addEventListener("mousemove", this.OnMouseMove)
 
+        window.addEventListener("resize", this.OnWindowResize)
+
         window.addEventListener("mouseup", () => {
             this.OnRePositionMouseUp()
             this.OnReSizeMouseUp()
@@ -131,6 +133,8 @@ export default {
 
     deactivated() {
         window.removeEventListener("mousemove", this.OnMouseMove)
+
+        window.removeEventListener("resize", this.OnWindowResize)
 
         window.removeEventListener("mouseup", () => {
             this.OnRePositionMouseUp()
@@ -145,7 +149,7 @@ export default {
     },
 
     methods: {
-        OnRePositionMouseDown() {
+        OnRePositionMouseDown () {
             if (this.maximized) return
 
             this.draggable = true;
@@ -155,21 +159,21 @@ export default {
             }
         },
 
-        OnRePositionMouseUp() {
+        OnRePositionMouseUp () {
             this.draggable = false
         },
 
-        OnReSizeMouseDown() {
+        OnReSizeMouseDown () {
             if (this.maximized) return
 
             this.resize = true
         },
 
-        OnReSizeMouseUp() {
+        OnReSizeMouseUp () {
             this.resize = false
         },
 
-        OnMouseMove(event) {
+        OnMouseMove (event) {
             this.mouseX = event.clientX
             this.mouseY = event.clientY
 
@@ -213,6 +217,8 @@ export default {
             } else if (this.mouseY - this.mouseDistance.y > window.innerHeight - this.size.height) {
                 this.position.top = window.innerHeight - this.size.height
             }
+
+            this.OnWindowResize()
         },
 
         CheckResizingConstraints () {
@@ -229,7 +235,7 @@ export default {
             }
         },
 
-        Maximize() {
+        Maximize () {
             this.draggable = false
             this.maximized = !this.maximized
 
@@ -270,6 +276,43 @@ export default {
                     top: this.previousPosition.top
                 }
             }
+        },
+
+        OnWindowResize () {
+            if (this.maximized) return
+
+            if (this.size.width > window.innerWidth) {
+                this.size.width = window.innerWidth - 15
+            }
+
+            if (this.size.height > window.innerHeight) {
+                this.size.height = window.innerHeight - 15
+            }
+
+            if (this.size.width < 400) {
+                this.size.width = 400
+            }
+
+            if (this.size.height < 350) {
+                this.size.height = 350
+            }
+
+            if (this.position.left + this.size.width > window.innerWidth) {
+                this.position.left = window.innerWidth - this.size.width
+            }
+
+            if (this.position.top + this.size.height > window.innerHeight) {
+                this.position.top = window.innerHeight - this.size.height
+            }
+
+            if (this.position.left < 0) {
+                this.position.left = 0
+            }
+
+            if (this.position.top < 55) {
+                this.position.top = 55
+            }
+
         }
     }
 }

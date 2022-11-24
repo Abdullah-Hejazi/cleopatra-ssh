@@ -1,9 +1,9 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, Menu, Tray, dialog } from 'electron'
+import { app, protocol, BrowserWindow, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 
-const ipcMain = require('electron').ipcMain;
+const ipcMain = require('electron').ipcMain
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -13,7 +13,7 @@ protocol.registerSchemesAsPrivileged([
     { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-let win = null;
+let win = null
 
 function createWindow() {
     // Create the browser window.
@@ -51,8 +51,8 @@ function createWindow() {
     }
 
     win.webContents.setWindowOpenHandler(function(e) {
-        require('electron').shell.openExternal(e.url);
-    });
+        require('electron').shell.openExternal(e.url)
+    })
 }
 
 // Quit when all windows are closed.
@@ -81,54 +81,54 @@ app.on('ready', async () => {
 ipcMain.on('select-folder', function (event) {
     let result = dialog.showOpenDialogSync({
         properties: ['openDirectory']
-    });
+    })
 
     event.returnValue = result
-});
+})
 
 // select file dialog
 ipcMain.on('select-file', function (event) {
     let result = dialog.showOpenDialogSync({
         properties: ['openFile']
-    });
+    })
 
     event.returnValue = result
-});
+})
 
 // select-multi-file dialog
 ipcMain.on('select-multi-file', function (event) {
     let result = dialog.showOpenDialogSync({
         properties: ['openFile', 'multiSelections']
-    });
+    })
 
     event.returnValue = result
-});
+})
 
 // select-any dialog
 ipcMain.on('select-multi-directory', function (event) {
     let result = dialog.showOpenDialogSync({
         properties: ['openDirectory', 'multiSelections']
-    });
+    })
 
     event.returnValue = result
-});
+})
 
 
 ipcMain.on('minimize-app', function (event, path) {
-    win.minimize();
-});
+    win.minimize()
+})
 
 ipcMain.on('maximize-app', function (event, path) {
     if (win.isMaximized()) {
-        win.unmaximize();
+        win.unmaximize()
     } else {
-        win.maximize();
+        win.maximize()
     }
-});
+})
 
 ipcMain.on('close-app', function (event, path) {
-    win.close();
-});
+    win.close()
+})
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
