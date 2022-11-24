@@ -62,6 +62,27 @@
                     </div>
                 </div>
 
+                <div class="scalein" v-if="loginData.authType.value === 'privatekey'">
+                    <div class="col-12 flex">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">
+                                <i class="pi pi-lock"></i>
+                            </span>
+                            <InputText :placeholder="$t('login.keypath')" v-model="loginData.privateKey" disabled />
+                        </div>
+                        <Button class="ml-2 p-button-text" icon="pi pi-folder-open" @click="SelectPrivateKeyPath" />
+                    </div>
+
+                    <div class="col-12 flex">
+                        <div class="p-inputgroup">
+                            <span class="p-inputgroup-addon">
+                                <i class="pi pi-key"></i>
+                            </span>
+                            <InputText :placeholder="$t('login.passphrase')" v-model="loginData.passPhrase" />
+                        </div>
+                    </div>
+                </div>
+
                 <div class="text-center mt-3">
                     <Button :label="$t('login.login')" class="login-button" @click="Login" />
                     
@@ -152,6 +173,8 @@
 import AccountItem from '@/components/AccountItem'
 import SSHClient from '@/services/ssh'
 
+const { ipcRenderer } = require('electron')
+
 export default {
     name: 'LoginView',
 
@@ -170,7 +193,9 @@ export default {
                 authType: {
                     name: 'Password',
                     value: 'password'
-                }
+                },
+                privateKey: '',
+                passPhrase: ''
             },
             authenticationTypes: [
                 {
@@ -208,7 +233,8 @@ export default {
                 authType: this.loginData.authType,
                 username: this.loginData.username,
                 displayName: this.loginData.displayName,
-                savePassword: (this.loginData.authType.value === 'password') ? this.savePassword : false
+                savePassword: (this.loginData.authType.value === 'password') ? this.savePassword : false,
+                privateKey: this.loginData.privateKey
             }
 
             if (this.savePassword && this.loginData.authType.value === 'password') {
@@ -227,6 +253,7 @@ export default {
         },
 
         async PerformLogin(account) {
+            SSHClient.ClearConnection()
             this.$loading.show()
 
             this.error = ''
@@ -237,6 +264,7 @@ export default {
             })
             .catch((error) => {
                 this.error = error
+                SSHClient.ClearConnection()
             }).finally(() => {
                 this.$loading.hide()
             })
@@ -270,6 +298,14 @@ export default {
             
             this.selectedAccount = true
         },
+
+        SelectPrivateKeyPath () {
+            let file = ipcRenderer.sendSync('select-file')
+
+            if (! file) return
+
+            this.loginData.privateKey = file[0]
+        }
     },
 }
 

@@ -82,6 +82,15 @@ ipcMain.on('select-folder', function (event) {
     event.returnValue = result
 });
 
+// select file dialog
+ipcMain.on('select-file', function (event) {
+    let result = dialog.showOpenDialogSync({
+        properties: ['openFile']
+    });
+
+    event.returnValue = result
+});
+
 // select-multi-file dialog
 ipcMain.on('select-multi-file', function (event) {
     let result = dialog.showOpenDialogSync({

@@ -36,7 +36,9 @@
         "noSavedAccounts": "There are no saved accounts.",
         "passwordNote": "Note",
         "passwordNoteText": "storing passwords is generally not recommended, if you choose not to, you'll be prompt to enter the password on subsequent logins !",
-        "typePassword": "Type the password"
+        "typePassword": "Type the password",
+        "keypath": "Key Path",
+        "passphrase": "PassPhrase"
     },
 
     "folder": {

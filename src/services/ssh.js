@@ -1,5 +1,5 @@
 var SSH2Promise = require('ssh2-promise')
-const path = require('path')
+const { readFileSync } = require('fs')
 
 let sshSession = null
 let sshFtp = null
@@ -8,24 +8,42 @@ let sshUser = {}
 export default {
     EstablishConnection: async (account) => {
         if (sshSession !== null) {
-			sshFtp.close()
-            sshSession.close()
+            await sshSession.close()
+			sshSession = null
+			sshFtp = null
         }
 
-        sshSession = new SSH2Promise({
-			host: account.host,
-			port: account.port ?? 22,
-			username: account.username,
-			password: account.password
-		})
+		if (account.authType.value === 'password') {
+			sshSession = new SSH2Promise({
+				host: account.host ?? 'localhost',
+				port: account.port ?? 22,
+				username: account.username,
+				password: account.password
+			})
+		} else {
+			sshSession = new SSH2Promise({
+				host: account.host ?? 'localhost',
+				port: account.port ?? 22,
+				username: account.username,
+				identity: account.privateKey
+			})
+		}
 
 		sshFtp = await sshSession.sftp()
 
 		sshUser.host = account.host
 		sshUser.username = account.username
 
-		return await sshSession.connect()
+		return sshSession.connect()
     },
+
+	ClearConnection: async () => {
+		if (sshSession !== null) {
+			await sshSession.close()
+		}
+		sshSession = null
+		sshFtp = null
+	},
 
 	GetCurrentUser: () => {
 		return sshUser
