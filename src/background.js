@@ -34,6 +34,10 @@ function createWindow() {
         }
     })
 
+    win.webContents.on('did-finish-load', () => {
+        win.setTitle('Cleopatra SSH')
+    })
+
     win.maximize()
 
     if (process.env.WEBPACK_DEV_SERVER_URL) {
