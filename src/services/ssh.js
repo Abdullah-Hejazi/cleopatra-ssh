@@ -25,7 +25,8 @@ export default {
 				host: account.host ?? 'localhost',
 				port: account.port ?? 22,
 				username: account.username,
-				identity: account.privateKey
+				identity: account.privateKey,
+				passphrase: account.passPhrase
 			})
 		}
 

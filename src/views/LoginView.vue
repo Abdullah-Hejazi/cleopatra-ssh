@@ -234,7 +234,8 @@ export default {
                 username: this.loginData.username,
                 displayName: this.loginData.displayName,
                 savePassword: (this.loginData.authType.value === 'password') ? this.savePassword : false,
-                privateKey: this.loginData.privateKey
+                privateKey: this.loginData.privateKey,
+                passPhrase: this.loginData.passPhrase
             }
 
             if (this.savePassword && this.loginData.authType.value === 'password') {
