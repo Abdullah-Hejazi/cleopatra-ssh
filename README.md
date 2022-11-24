@@ -5,4 +5,6 @@ Instead of typing command in your terminal, you can interact with your SSH serve
 It also has a lot of tools such as text editors, image viewer, and a lot of other tools.
 
 ### Todo List:
-- [ ] Add Passphrase
+- [ ] Fix UI
+- [ ] Remove Themes ?
+- [ ] Add Logout
