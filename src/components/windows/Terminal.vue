@@ -88,6 +88,9 @@ export default {
             SSHClient.Shell('cd ' + path).then((socket) => {
                 this.socket = socket
                 this.socket.on('data', this.RecieveBuffer)
+
+                this.command = 'cd ' + path
+                this.WriteBuffer()
             })
         },
 
