@@ -136,5 +136,15 @@
     "terminal": {
         "copy": "Copy",
         "paste": "Paste"
+    },
+
+    "desktop": {
+        "changebackground": "Change Background",
+        "fromurl": "From URL",
+        "fromfile": "From File",
+        "change": "Change",
+        "imagepath": "Image Path",
+        "imageurl": "Image URL",
+        "removebackground": "Remove Background"
     }
 }

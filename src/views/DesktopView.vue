@@ -1,5 +1,7 @@
 <template>
-    <div class="desktop-background flex flex-column align-content-center flex-wrap justify-content-end">
+    <div class="desktop-background flex flex-column align-content-center flex-wrap justify-content-end" @contextmenu="OnDesktopContextMenu" :style="{backgroundImage: 'url(' + backgroundImage + ')'}">
+        <ContextMenu ref="desktopmenu" :model="desktopContextMenu" style="width: 250px;" />
+
         <div v-for="process in processes" :key="process.id">
             <KeepAlive>
                 <component :is="process.name" v-bind="GetProcessProps(process.id)" v-if="process.visible" />
@@ -24,6 +26,39 @@
         <div style="z-index: 9999;">
             <TaskBar :onOpen="OpenProcess" :onActiveApps="ToggleActiveApps" />
         </div>
+
+        
+        <Dialog :header="$t('desktop.changebackground')" v-model:visible="changeImageDialog.visible" style="width: 500px" :modal="true">
+            <div class="mt-2 flex">
+                <span class="p-input-icon-left flex-grow-1">
+                    <i class="pi pi-sort-alt" />
+                    <Dropdown @change="changeImageDialog.path = ''" v-model="changeImageDialog.type" :options="backgroundTypes" optionLabel="name" class="w-full" />
+                </span>
+            </div>
+
+            <div class="mt-3 flex" v-if="changeImageDialog.type.value === 'file'">
+                <span class="p-input-icon-left flex-grow-1">
+                    <i class="pi pi-folder" />
+                    <InputText :placeholder="$t('desktop.imagepath')" disabled type="text" v-model="changeImageDialog.path" class="w-full input-bg" />
+                </span>
+
+                <Button icon="pi pi-folder" class="p-button-text ml-2" @click="SelectImagePath" />
+            </div>
+
+            <div class="mt-3 flex" v-if="changeImageDialog.type.value === 'url'">
+                <span class="p-input-icon-left flex-grow-1">
+                    <i class="pi pi-link" />
+                    <InputText :placeholder="$t('desktop.imageurl')" type="text" v-model="changeImageDialog.path" class="w-full input-bg" />
+                </span>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-content-center mt-2">
+                    <Button :label="$t('desktop.removebackground')" class="p-button-text p-button-secondary" @click="RemoveBackground" />
+                    <Button :label="$t('desktop.changebackground')" @click="ChangeBackground" />
+                </div>
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -38,6 +73,10 @@ import Terminal from '@/components/windows/Terminal'
 import IconItem from '@/components/IconItem'
 
 import Helpers from '@/services/helpers'
+
+const { ipcRenderer } = require('electron')
+
+const fs = require('fs')
 
 export default {
     name: 'DesktopView',
@@ -64,8 +103,46 @@ export default {
                 ImageViewer: '/imageviewer.png'
             },
 
-            currentZIndex: 1500
+            currentZIndex: 1500,
+
+            changeImageDialog: {
+                visible: true,
+                path: '',
+                type: {
+                    name: this.$t('desktop.fromfile'),
+                    value: "file"
+                },
+            },
+
+            backgroundTypes: [
+                {
+                    name: this.$t('desktop.fromfile'),
+                    value: "file"
+                },
+                {
+                    name: this.$t('desktop.fromurl'),
+                    value: "url"
+                }
+            ],
+
+            desktopContextMenu: [
+                {
+					label: this.$t('desktop.changebackground'),
+					icon: 'pi pi-image',
+                    command: () => {
+                        this.changeImageDialog.visible = true
+                    }
+                },
+            ],
+
+            backgroundImage: '/background.jpg'
         }
+    },
+
+    mounted () {
+        let img = localStorage.getItem('desktopBackground')
+
+        this.backgroundImage = img ? img : '/background.jpg'
     },
 
     methods: {
@@ -129,6 +206,46 @@ export default {
         onZIndexChange (id) {
             if (this.processes[id])
                 this.processes[id].zIndex = this.currentZIndex++
+        },
+
+        OnDesktopContextMenu (event) {
+            if (event.target === this.$el) {
+                this.$refs.desktopmenu.show(event)
+            }
+        },
+
+        SelectImagePath () {
+            let files = ipcRenderer.sendSync('select-image')
+
+            if (files && files.length) {
+                this.changeImageDialog.path = files[0]
+            }
+        },
+
+        SetBackgroundImage(path) {
+            this.backgroundImage = path
+        },
+
+        ChangeBackground () {
+            if (this.changeImageDialog.path.length === 0) return
+
+            let img = this.changeImageDialog.type.value === 'url' ?
+                        this.changeImageDialog.path :
+                        'data:image/jpeg;base64,' + fs.readFileSync(this.changeImageDialog.path).toString('base64') 
+
+            localStorage.setItem('desktopBackground', img)
+
+            this.SetBackgroundImage(img)
+
+            this.changeImageDialog.visible = false
+        },
+
+        RemoveBackground () {
+            localStorage.removeItem('desktopBackground')
+
+            this.SetBackgroundImage('/background.jpg')
+
+            this.changeImageDialog.visible = false
         }
     }
 }
@@ -137,7 +254,6 @@ export default {
 
 <style>
     .desktop-background {
-        background-image: url("/src/assets/background.jpg");
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;

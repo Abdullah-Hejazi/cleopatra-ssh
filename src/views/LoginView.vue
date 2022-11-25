@@ -47,7 +47,7 @@
                         <span class="p-inputgroup-addon">
                             <i class="pi pi-sort-alt"></i>
                         </span>
-                        <Dropdown v-model="loginData.authType" :options="authenticationTypes" optionLabel="name" placeholder="Select Authentication Type" />
+                        <Dropdown v-model="loginData.authType" :options="authenticationTypes" optionLabel="name" />
                     </div>
                 </div>
 

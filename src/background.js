@@ -95,6 +95,18 @@ ipcMain.on('select-file', function (event) {
     event.returnValue = result
 })
 
+// select file dialog
+ipcMain.on('select-image', function (event) {
+    let result = dialog.showOpenDialogSync({
+        properties: ['openFile'],
+        filters: [
+            { name: 'Images', extensions: ['jpg', 'png', 'jpeg', 'webp', 'gif'] },
+        ]
+    })
+
+    event.returnValue = result
+})
+
 // select-multi-file dialog
 ipcMain.on('select-multi-file', function (event) {
     let result = dialog.showOpenDialogSync({
@@ -104,7 +116,7 @@ ipcMain.on('select-multi-file', function (event) {
     event.returnValue = result
 })
 
-// select-any dialog
+// select-multi-directory dialog
 ipcMain.on('select-multi-directory', function (event) {
     let result = dialog.showOpenDialogSync({
         properties: ['openDirectory', 'multiSelections']
