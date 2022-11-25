@@ -12,13 +12,13 @@
         "language": "Language",
         "success": "Success",
         "delete": "Delete",
-        "processes": "Active Apps",
+        "processes": "Process Manager",
         "Editor": "Text Editor",
         "FolderBrowser": "Folder Browser",
         "Terminal": "Terminal",
         "ImageViewer": "Image Viewer",
         "minimizedprocesses": "Minimized Applications",
-        "noprocesses": "You have no Minimized Applications"
+        "noprocesses": "No Active Processes"
     },
 
     "login": {

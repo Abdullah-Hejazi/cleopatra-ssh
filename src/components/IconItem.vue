@@ -22,13 +22,12 @@
 <style>
     .icon-item{
         padding: 2px;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.25s ease-in-out;
         cursor: pointer;
-        border-bottom: 2px solid transparent;
-        border-radius: 5px;
+        border-bottom: 3px solid transparent;
     }
 
     .icon-item:hover {
-        border-bottom: 2px solid #ebdede;
+        border-bottom: 2px solid #ffffff80;
     }
 </style>

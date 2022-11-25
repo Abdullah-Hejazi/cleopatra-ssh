@@ -202,6 +202,10 @@ export default {
         },
 
         ToggleActiveApps (event) {
+            if (Object.keys(this.processes).length === 0) {
+                return
+            }
+
             this.$refs.processmanagermenu.toggle(event)
         },
 
@@ -273,14 +277,5 @@ export default {
         background-position: center;
         height: calc(100vh - 55px);
         width: 100%;
-    }
-
-    .active-apps {
-        background-color: #00000088;
-        border-radius: 10px;
-        padding: 0px 10px 0px 10px;
-        z-index: 9999;
-        max-width: 385px;
-        overflow-x: auto;
     }
 </style>
