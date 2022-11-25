@@ -161,4 +161,8 @@ export default {
         z-index: 9999999 !important;
     }
 
+    .p-tooltip {
+        z-index: 9999999 !important;
+    }
+
 </style>
