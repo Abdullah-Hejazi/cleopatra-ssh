@@ -282,10 +282,6 @@ export default {
                     command: this.Download
                 },
                 {
-					label: this.$t('folder.execute'),
-					icon: 'pi pi-dollar'
-                },
-                {
                     separator: true
                 },
                 {
