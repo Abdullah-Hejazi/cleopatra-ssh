@@ -11,7 +11,7 @@
                         {{ account.username }}@{{ account.host }}<span class="text-gray-500">:{{ account.port }}</span>
                     </div>
                     <div class="text-xs text-gray-500 mt-1">
-                        {{ authenticationType }} Authentication
+                        {{ authenticationType }} {{ $t('login.authentication') }}
                     </div>
                 </div>
             </div>
