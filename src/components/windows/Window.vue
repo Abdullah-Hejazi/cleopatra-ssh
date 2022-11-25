@@ -172,6 +172,7 @@ export default {
         },
 
         OnMouseMove (event) {
+            console.log('here')
             this.mouseX = event.clientX
             this.mouseY = event.clientY
 

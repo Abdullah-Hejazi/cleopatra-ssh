@@ -106,7 +106,7 @@ export default {
             currentZIndex: 1500,
 
             changeImageDialog: {
-                visible: true,
+                visible: false,
                 path: '',
                 type: {
                     name: this.$t('desktop.fromfile'),
