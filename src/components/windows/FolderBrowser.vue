@@ -185,7 +185,9 @@ export default {
         'onMinimize',
         'zIndex',
         'onZIndexChange',
-        'onOpenProcess'
+        'onOpenProcess',
+        'OnRefreshUpdate',
+        'refreshIndex'
     ],
 
     components: {
@@ -425,7 +427,8 @@ export default {
             changingPermissions: 0,
 
 
-            focused: true
+            focused: true,
+            currentRefreshIndex: 0
         }
     },
 
@@ -609,7 +612,7 @@ export default {
 
             if (this.newFile.directory) {
                 SSHClient.CreateDirectory(file).then(() => {
-                    this.Load(this.currentPath)
+                    this.OnRefreshUpdate()
                 }).catch((err) => {
                     this.error = err
                 }).finally(() => {
@@ -631,7 +634,7 @@ export default {
 
         ExecuteCreateFile (file) {
             SSHClient.CreateFile(file).then(() => {
-                this.Load(this.currentPath)
+                this.OnRefreshUpdate()
             }).catch((err) => {
                 this.error = err
             }).finally(() => {
@@ -789,7 +792,7 @@ export default {
                 delete this.upload.items[uid]
 
                 if (Object.keys(this.upload.items).length === 0) {
-                    this.Load(this.currentPath)
+                    this.OnRefreshUpdate()
                 }
             })
         },
@@ -825,7 +828,7 @@ export default {
             }
 
             SSHClient.Move(this.currentPath + '/' + file, this.currentPath + '/' + this.rename.name).then(() => {
-                this.Load(this.currentPath)
+                this.OnRefreshUpdate()
             }).catch((err) => {
                 this.$toast.add({severity:'error', summary: this.$t('folder.renamefailed') + ': ' + file, detail: err, life: 6000});
             }).finally(() => {
@@ -864,7 +867,7 @@ export default {
 
                 if (this.deleting === 0) {
                     this.$toast.add({severity:'success', summary: this.$t('folder.deletesuccess'), life: 3000});
-                    this.Load(this.currentPath)
+                    this.OnRefreshUpdate()
                 }
             })
         },
@@ -912,7 +915,7 @@ export default {
 
                 if (this.copying === 0) {
                     this.$toast.add({severity:'success', summary: this.$t('folder.pastesuccess'), life: 3000})
-                    this.Load(this.currentPath)
+                    this.OnRefreshUpdate()
                 }
             })
         },
@@ -949,7 +952,7 @@ export default {
 
                 if (this.moving === 0) {
                     this.$toast.add({severity:'success', summary: this.$t('folder.pastesuccess'), life: 3000})
-                    this.Load(this.currentPath)
+                    this.OnRefreshUpdate()
                 }
             })
         },
@@ -1033,7 +1036,7 @@ export default {
                     this.changingPermissions--
 
                     if (this.changingPermissions === 0) {
-                        this.Load(this.currentPath)
+                        this.OnRefreshUpdate()
                         this.permissions.visible = false
                     }
                 })
@@ -1102,7 +1105,16 @@ export default {
                 this.selected = []
             }
         }
-    }
+    },
+
+    watch: {
+        refreshIndex (val) {
+            if (val !== this.currentRefreshIndex) {
+                this.currentRefreshIndex = val
+                this.Load(this.currentPath)
+            }
+        }
+    },
 }
 </script>
 

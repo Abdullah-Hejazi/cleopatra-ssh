@@ -105,6 +105,8 @@ export default {
 
             currentZIndex: 1500,
 
+            refreshIndex: 0, // Used to refresh processes intentionally (e.g when a folder has a new file, it requires all other folders to refresh)
+
             changeImageDialog: {
                 visible: false,
                 path: '',
@@ -176,7 +178,9 @@ export default {
                     onClose: () => this.CloseProcess(id),
                     onMinimize: () => this.MinimizeProcess(id),
                     onZIndexChange: () => this.onZIndexChange(id),
-                    onOpenProcess: this.OpenProcess
+                    onOpenProcess: this.OpenProcess,
+                    refreshIndex: this.refreshIndex,
+                    OnRefreshUpdate: this.OnRefreshUpdate
                 }
             }
 
@@ -264,6 +268,10 @@ export default {
             this.SetBackgroundImage('/background.jpg')
 
             this.changeImageDialog.visible = false
+        },
+
+        OnRefreshUpdate () {
+            this.refreshIndex++
         }
     }
 }
