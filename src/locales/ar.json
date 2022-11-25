@@ -103,7 +103,19 @@
         "copysuccess": "تم النسخ",
         "cutsuccess": "تم القص",
         "pastesuccess": "تم اللصق",
-        "deletesuccess": "تم الحذف"
+        "deletesuccess": "تم الحذف",
+        "createsymlink": "إنشاء إرتباط رمزي",
+        "symlinkname": "إسم الإرتباط الرمزي",
+        "symlinkcreate": "إنشاء",
+        "symlinkfailed": "فشل إنشاء الإرتباط الرمزي",
+        "symlinkpath": "مسار حفظ الإرتباط الرمزي",
+        "symlinktopath": "يشير إلى",
+        "symlinkfilldata": "إملى البيانات المطلوبة",
+        "symlinkdescription1": "سيتم إنشاء إرتباط رمزي إسمه (",
+        "symlinkdescription2": ") ويشير إلى (",
+        "symlinkdescription3": ") وسيتم حفظه في (",
+        "symlinkdescription4": ")",
+        "symlinkcreated": "تم إنشاء الإرتباط الرمزي"
     },
 
     "editor": {

@@ -165,6 +165,51 @@
                 </template>
             </Dialog>
         </Window>
+
+        <Modal :size="{width: 450, height: 350}" :header="$t('folder.createsymlink')" v-model="symlink.visible">
+            <div class="px-3">
+                <div class="p-text-secondary">
+                    <InputText :placeholder="$t('folder.symlinkname')" v-model="symlink.name" class="w-full mt-3 input-bg" />
+                </div>
+
+                <div class="mt-2 flex">
+                    <span class="p-input-icon-left flex-grow-1">
+                        <i class="pi pi-folder" />
+                        <InputText :placeholder="$t('folder.symlinkpath')" disabled type="text" v-model="symlink.symlinkpath" class="w-full input-bg" />
+                    </span>
+
+                    <Button icon="pi pi-folder" class="p-button-text ml-2" @click="symlink.symlinkpathdialog = true" />
+                </div>
+
+                <div class="mt-2 flex">
+                    <span class="p-input-icon-left flex-grow-1">
+                        <i class="pi pi-folder" />
+                        <InputText :placeholder="$t('folder.symlinktopath')" disabled type="text" v-model="symlink.pointstopath" class="w-full input-bg" />
+                    </span>
+
+                    <Button icon="pi pi-folder" class="p-button-text ml-2" @click="symlink.pointstopathdialog = true" />
+                </div>
+
+                <div class="text-color-secondary">
+                    <p>
+                        {{ $t('folder.symlinkdescription1') }}
+                        {{ symlink.name}}
+                        {{ $t('folder.symlinkdescription2') }}
+                        {{ symlink.pointstopath}}
+                        {{ $t('folder.symlinkdescription3') }}
+                        {{ symlink.symlinkpath}}
+                        {{ $t('folder.symlinkdescription4') }}
+                    </p>
+                </div>
+
+                <div class="flex justify-content-center mt-2">
+                    <Button :label="$t('folder.symlinkcreate')" @click="CreateSymbolicLink" />
+                </div>
+            </div>
+        </Modal>
+
+        <FileDialog v-if="symlink.symlinkpathdialog" type="folders" :Finish="SetSymLinkPath" :Cancel="() => {symlink.symlinkpathdialog = false}" />
+        <FileDialog v-if="symlink.pointstopathdialog" type="both" :Finish="SetPointsToPath" :Cancel="() => {symlink.pointstopathdialog = false}" />
     </div>
 </template>
 
@@ -177,6 +222,8 @@ const { ipcRenderer } = require('electron')
 var pathLib = require('path')
 
 import Window from '@/components/windows/Window'
+import Modal from '@/components/windows/Modal'
+import FileDialog from '@/components/windows/FileDialog'
 
 export default {
     name: 'FolderBrowser',
@@ -192,7 +239,9 @@ export default {
     ],
 
     components: {
-        Window
+        Window,
+        Modal,
+        FileDialog
     },
 
     data () {
@@ -360,6 +409,11 @@ export default {
                     command: () => this.NewFile(false)
                 },
                 {
+                    label: this.$t('folder.createsymlink'),
+                    icon: 'pi pi-link',
+                    command: this.OptenSymLinkDialog
+                },
+                {
 					label: this.$t('folder.openterminal'),
 					icon: 'pi pi-dollar',
                     command: () => this.OpenTerminal(true)
@@ -420,6 +474,16 @@ export default {
                 visible: false,
                 name: '',
                 index: 0
+            },
+
+            symlink: {
+                visible: false,
+                name: '',
+                path: '',
+                pointstopath: '',
+                symlinkpathdialog: false,
+                pointstopathdialog: false,
+                fileDialog: false
             },
 
             copying: 0,
@@ -1170,6 +1234,40 @@ export default {
             } else if (event.key === 'Escape') {
                 this.selected = []
             }
+        },
+
+        OptenSymLinkDialog () {
+            this.symlink.visible = true
+        },
+
+        SetSymLinkPath (file) {
+            this.symlink.symlinkpath = file.path + '/' + file.name
+            this.symlink.symlinkpathdialog = false
+        },
+
+        SetPointsToPath (file) {
+            this.symlink.pointstopath = file.path + '/' + file.name
+            this.symlink.pointstopathdialog = false
+        },
+
+        CreateSymbolicLink () {
+            if (this.symlink.symlinkpath === '' || this.symlink.pointstopath === '' || this.symlink.name === '') {
+                this.$toast.add({severity:'error', summary: this.$t('folder.symlinkfilldata'), life: 6000});
+                return
+            }
+
+            SSHClient.Execute('ln -s ' + this.symlink.pointstopath + ' ' + this.symlink.symlinkpath + '/' + this.symlink.name).then((res) => {
+                this.symlink.symlinkpath = ''
+                this.symlink.pointstopath = ''
+                this.symlink.name = ''
+                this.symlink.visible = false
+
+                this.$toast.add({severity:'success', summary: this.$t('folder.symlinkcreated'), life: 6000});
+
+                this.OnRefreshUpdate()
+            }).catch((err) => {
+                this.$toast.add({severity:'error', summary: this.$t('folder.symlinkfailed'), detail: err, life: 6000});
+            })
         }
     },
 

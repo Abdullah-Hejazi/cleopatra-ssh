@@ -1,5 +1,5 @@
 <template>
-    <Window style="z-index: 2100;" :onClose="Cancel" :noMinimize="true" :title="$t('filedialog.title')" icon="/folder.png" :defaultSize="{width: 650, height: 400}" defaultLocation="center">
+    <Window style="z-index: 999999;" :onClose="Cancel" :noMinimize="true" :title="$t('filedialog.title')" icon="/folder.png" :defaultSize="{width: 650, height: 400}" defaultLocation="center">
         <div class="path-bar">
             <div class="path flex">
                 <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
@@ -257,7 +257,7 @@ export default {
 
         Select () {
             if (this.selected.length === 0) {
-                if (this.type === 'folders') {
+                if (this.type === 'folders' || this.type === 'both') {
                     this.Finish({
                         path: this.currentPath,
                         name: ''
@@ -279,6 +279,11 @@ export default {
                         name: this.files[this.selected[0]].name
                     })
                 } else if (this.type === 'images' && !this.files[this.selected[0]].directory) {
+                    this.Finish({
+                        path: this.currentPath,
+                        name: this.files[this.selected[0]].name
+                    })
+                } else {
                     this.Finish({
                         path: this.currentPath,
                         name: this.files[this.selected[0]].name

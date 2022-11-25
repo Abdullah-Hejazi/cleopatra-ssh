@@ -103,7 +103,19 @@
         "copysuccess": "Copy Success",
         "cutsuccess": "Cut Success",
         "pastesuccess": "Paste Success",
-        "deletesuccess": "Delete Success"
+        "deletesuccess": "Delete Success",
+        "createsymlink": "Create Symlink",
+        "symlinkname": "Symbolic Link Name",
+        "symlinkcreate": "Create",
+        "symlinkfailed": "Create Symbolic Link Failed",
+        "symlinkpath": "Symbolic Link Path",
+        "symlinktopath": "Points to",
+        "symlinkfilldata": "Fill the required fields.",
+        "symlinkdescription1": "This will create a symbolink link named (",
+        "symlinkdescription2": ") that points to (",
+        "symlinkdescription3": ") and is saved in directory (",
+        "symlinkdescription4": ")",
+        "symlinkcreated": "Symbolic Link Created"
     },
 
     "editor": {

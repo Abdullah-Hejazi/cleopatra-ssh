@@ -188,7 +188,7 @@ export default {
                 return
             }
 
-            if (this.resize && !this.maximized) {
+            if (this.resize && !this.maximized && !this.noMaximize) {
                 this.size = {
                     width: this.mouseX - this.position.left + 15,
                     height: this.mouseY - this.position.top + 15,
@@ -277,7 +277,7 @@ export default {
         },
 
         OnWindowResize () {
-            if (this.maximized) return
+            if (this.maximized || this.noMaximize) return
 
             if (this.size.width > window.innerWidth) {
                 this.size.width = window.innerWidth - 15

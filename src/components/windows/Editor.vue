@@ -28,7 +28,7 @@
             </div>
         </Window>
 
-        <Modal :header="$t('editor.saveas')" v-model="saveAs.visible" class="p-5">
+        <Modal :header="$t('editor.saveas')" v-model="saveAs.visible">
             <div class="px-3">
                 <div class="p-text-secondary">
                     <InputText :placeholder="$t('editor.name')" v-model="saveAs.name" class="w-full mt-3 input-bg" />
