@@ -16,7 +16,8 @@ export default {
         return directory.map((item) => {
             return {
                 name: item.filename,
-                directory: item.longname.startsWith('d'),
+                directory: item.attrs.isDirectory(),
+                symlink: item.attrs.isSymbolicLink(),
                 size: item.attrs.size,
                 permissions: item.longname.substring(1, 10),
             }

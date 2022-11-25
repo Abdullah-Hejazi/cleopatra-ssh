@@ -27,10 +27,11 @@
                     <ScrollPanel style="width: 100%; height: 100%">
                         <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" v-on:dblclick="LoadItem(folder)">
                             <div @contextmenu="OnContextMenu($event, index)" :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
-                                <i :class="(folder.directory) ? 'pi pi-folder' : 'pi pi-file'" style="font-size: 1rem"></i>
+                                <i :class="GetItemIcon(folder)" style="font-size: 1rem"></i>
                                 <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
                             </div>
                         </div>
+                        <div style="width: 10px; height: 15px;"></div>
                     </ScrollPanel>
 
                     <ContextMenu ref="foldermenu" :model="folderContextMenuItems" />
@@ -489,6 +490,18 @@ export default {
                 this.loading = false
             })
 
+        },
+
+        GetItemIcon (item) {
+            if (item.symlink) {
+                return 'pi pi-link'
+            }
+
+            if (item.directory) {
+                return 'pi pi-folder'
+            }
+
+            return 'pi pi-file'
         },
 
         SelectSideBarItem (item) {
@@ -1124,7 +1137,7 @@ export default {
     }
 
     .folder-browser-window {
-        height: calc(100% - 85px);
+        height: calc(100% - 95px);
     }
 
     .side-bar {
