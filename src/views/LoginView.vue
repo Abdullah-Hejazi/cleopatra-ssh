@@ -45,7 +45,7 @@
                 <div class="col-12">
                     <div class="p-inputgroup">
                         <span class="p-inputgroup-addon">
-                            <i class="pi pi-sort-alt"></i>
+                            <i class="pi pi-caret-down"></i>
                         </span>
                         <Dropdown v-model="loginData.authType" :options="authenticationTypes" optionLabel="name" />
                     </div>
