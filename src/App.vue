@@ -169,4 +169,8 @@ export default {
         z-index: 9999999 !important;
     }
 
+    .p-toast {
+        z-index: 9999999 !important;
+    }
+
 </style>

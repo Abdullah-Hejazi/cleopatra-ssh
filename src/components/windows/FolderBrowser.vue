@@ -475,21 +475,74 @@ export default {
             this.selected = []
 
             SSHClient.List(path).then((result) => {
-                this.files = Helpers.ParseDirectory(result).sort((a, b) => {
-                    if (a.directory && !b.directory)        return -1
-                    else if (!a.directory && b.directory)   return 1
-
-                    return 0
-                })
+                let data = Helpers.ParseDirectory(result)
 
                 this.currentPath = path
                 this.UpdateSideBarItem()
+
+                this.LoadSymbolicLinks(data)
             }).catch((err) => {
                 this.error = err
-            }).finally(() => {
-                this.loading = false
             })
 
+        },
+
+        LoadSymbolicLinks (data) {
+            let symlinks = ""
+
+            data.forEach((item) => {
+                if (item.symlink) {
+                    symlinks += "test -d \"" + this.currentPath + '/' + item.name + "\" && echo 'd' || echo 'f'; "
+                }
+            })
+
+
+            if (symlinks.length > 0) {
+                SSHClient.Execute(symlinks).then((result) => {
+                    let lines = result.split("\n")
+
+                    data.forEach((item) => {
+                        if (item.symlink) {
+                            item.directory = lines.shift() === 'd'
+                        }
+                    })
+
+                    this.SortFiles(data)
+                }).catch((err) => {
+                    this.error = err
+                }).finally(() => {
+                    this.loading = false
+                })
+
+                return
+            }
+
+            this.SortFiles(data)
+        },
+
+        SortFiles (files) {
+            files.sort((a, b) => {
+                if (a.directory && !b.directory) {
+                    return -1
+                }
+
+                if (!a.directory && b.directory) {
+                    return 1
+                }
+
+                if (a.name < b.name) {
+                    return -1
+                }
+
+                if (a.name > b.name) {
+                    return 1
+                }
+
+                return 0
+            })
+
+            this.files = files
+            this.loading = false
         },
 
         GetItemIcon (item) {
