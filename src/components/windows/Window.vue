@@ -72,7 +72,12 @@ export default {
                 width: 720,
                 height: 400,
                 unit: 'px'
-            }
+            },
+
+            NonKeepAlive: [
+                'FileDialog',
+                'Modal'
+            ]
         }
     },
 
@@ -118,28 +123,22 @@ export default {
                 this.previousPosition = this.defaultPosition
             }
         }
+
+        if (this.NonKeepAlive.includes(this.$parent.$options.name)) {
+            this.OnActivated()
+        }
     },
 
-    activated() {
-        window.addEventListener("mousemove", this.OnMouseMove)
-
-        window.addEventListener("resize", this.OnWindowResize)
-
-        window.addEventListener("mouseup", this.OnMouseUp)
+    activated () {
+        this.OnActivated()
     },
 
-    deactivated() {
-        window.removeEventListener("mousemove", this.OnMouseMove)
-
-        window.removeEventListener("resize", this.OnWindowResize)
-
-        window.removeEventListener("mouseup", this.OnMouseUp)
+    deactivated () {
+        this.OnDeactivated()
     },
 
     beforeDestroy () {
-        window.removeEventListener("mousemove", this.OnMouseMove)
-        window.removeEventListener("mouseup", this.OnRePositionMouseUp)
-        window.removeEventListener("mouseup", this.OnReSizeMouseUp)
+        this.OnDeactivated()
     },
 
     methods: {
@@ -312,6 +311,18 @@ export default {
                 this.position.top = 55
             }
 
+        },
+
+        OnDeactivated () {
+            window.removeEventListener("mousemove", this.OnMouseMove)
+            window.removeEventListener("mouseup", this.OnRePositionMouseUp)
+            window.removeEventListener("mouseup", this.OnReSizeMouseUp)
+        },
+
+        OnActivated () {
+            window.addEventListener("mousemove", this.OnMouseMove)
+            window.addEventListener("resize", this.OnWindowResize)
+            window.addEventListener("mouseup", this.OnMouseUp)
         }
     }
 }
