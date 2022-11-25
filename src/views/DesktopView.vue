@@ -8,25 +8,26 @@
             </KeepAlive>
         </div>
 
-        <div class="active-apps mb-3" v-if="showActiveApps">
-            <p class="mt-1 mb-3 text-center">{{ $t('general.minimizedprocesses') }}</p>
-            <div class="flex mb-3">
-                <div v-for="process in GetMinimizedApps()" :key="process.id" class="mx-1">
-                    <div v-if="!process.visible">
-                        <IconItem :name="process.title" :icon="icons[process.name]" width="20" @click="process.visible = true" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-3 text-center" v-if="! GetMinimizedApps().length">
-                {{ $t('general.noprocesses') }}
-            </div>
-        </div>
-
         <div style="z-index: 9999;">
             <TaskBar :onOpen="OpenProcess" :onActiveApps="ToggleActiveApps" />
         </div>
 
+        <ContextMenu ref="processmanagermenu" :model="Object.entries(processes)">
+            <template #item="{item}">
+                <div class="flex cursor-pointer align-items-center px-2">
+                    <div class="flex flex-row align-items-center py-2" @click="ToggleMinimize(item[0])">
+                        <img :src="icons[item[1].name]" width="20">
+                        <div class="ml-2">
+                            {{ item[1].title }}
+                        </div>
+                    </div>
+
+                    <div class="ml-auto">
+                        <Button class="p-button-raised p-button-rounded p-button-danger p-button-rounded p-button-sm p-0" style="width: 22px; height: 22px;" icon="pi pi-times" @click="CloseProcess(item[1].id)"></Button>
+                    </div>
+                </div>
+            </template>
+        </ContextMenu>
         
         <Dialog :header="$t('desktop.changebackground')" v-model:visible="changeImageDialog.visible" style="width: 500px" :modal="true">
             <div class="mt-2 flex">
@@ -94,7 +95,6 @@ export default {
     data () {
         return {
             processes: {},
-            showActiveApps: false,
 
             icons: {
                 Editor: '/texteditor.png',
@@ -126,6 +126,16 @@ export default {
             ],
 
             desktopContextMenu: [
+                {
+					label: this.$t('desktop.changebackground'),
+					icon: 'pi pi-image',
+                    command: () => {
+                        this.changeImageDialog.visible = true
+                    }
+                },
+            ],
+
+            processManagerContextMenu: [
                 {
 					label: this.$t('desktop.changebackground'),
 					icon: 'pi pi-image',
@@ -187,8 +197,12 @@ export default {
             this.processes[id].visible = false
         },
 
-        ToggleActiveApps () {
-            this.showActiveApps = !this.showActiveApps
+        ToggleMinimize (id) {
+            this.processes[id].visible = !this.processes[id].visible
+        },
+
+        ToggleActiveApps (event) {
+            this.$refs.processmanagermenu.toggle(event)
         },
 
         GetMinimizedApps () {

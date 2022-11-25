@@ -1,3 +1,12 @@
+<template>
+    <div class="icon-item mx-2">
+        <div class="text-center">
+            <img :src="icon" :width="width">
+            <p class="m-0 text-xs">{{ name }}</p>
+        </div>
+    </div>
+</template>
+
 <script>
     export default {
         name: 'IconItem',
@@ -9,15 +18,6 @@
         ]
     }
 </script>
-
-<template>
-    <div class="icon-item mx-2">
-        <div class="text-center">
-            <img :src="icon" :width="width">
-            <p class="m-0 text-xs">{{ name }}</p>
-        </div>
-    </div>
-</template>
 
 <style>
     .icon-item{
