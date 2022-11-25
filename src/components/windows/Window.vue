@@ -125,10 +125,7 @@ export default {
 
         window.addEventListener("resize", this.OnWindowResize)
 
-        window.addEventListener("mouseup", () => {
-            this.OnRePositionMouseUp()
-            this.OnReSizeMouseUp()
-        })
+        window.addEventListener("mouseup", this.OnMouseUp)
     },
 
     deactivated() {
@@ -136,10 +133,7 @@ export default {
 
         window.removeEventListener("resize", this.OnWindowResize)
 
-        window.removeEventListener("mouseup", () => {
-            this.OnRePositionMouseUp()
-            this.OnReSizeMouseUp()
-        })
+        window.removeEventListener("mouseup", this.OnMouseUp)
     },
 
     beforeDestroy () {
@@ -167,6 +161,11 @@ export default {
             if (this.maximized) return
 
             this.resize = true
+        },
+
+        OnMouseUp () {
+            this.OnRePositionMouseUp()
+            this.OnReSizeMouseUp()
         },
 
         OnReSizeMouseUp () {
