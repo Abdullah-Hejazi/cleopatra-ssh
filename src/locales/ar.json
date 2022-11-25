@@ -99,7 +99,11 @@
         "openlargefileconfirm": "فتح ملف كبير",
         "openlargefileconfirmtext": "هذا الملف ( ",
         "openlargefileconfirmtext2": " ) كبير جداً, هل تود فتحه فعلا ؟",
-        "openterminal": "فتح وحدة الأوامر هنا"
+        "openterminal": "فتح وحدة الأوامر هنا",
+        "copysuccess": "تم النسخ",
+        "cutsuccess": "تم القص",
+        "pastesuccess": "تم اللصق",
+        "deletesuccess": "تم الحذف"
     },
 
     "editor": {

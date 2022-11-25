@@ -863,6 +863,7 @@ export default {
                 this.deleting--
 
                 if (this.deleting === 0) {
+                    this.$toast.add({severity:'success', summary: this.$t('folder.deletesuccess'), life: 3000});
                     this.Load(this.currentPath)
                 }
             })
