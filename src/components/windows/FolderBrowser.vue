@@ -1,168 +1,170 @@
 <template>
-    <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :title="$t('folder.browser')" icon="/folder.png" :defaultSize="{width: 850, height: 500}" :onClose="onClose" :onMinimize="onMinimize">
-        <div class="path-bar">
-            <div class="path flex">
-                <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
-                <div class="flex-grow-1 p-0 mr-3">
-                    <InputText spellcheck="false" @focus="pathFocused = true" @blur="pathFocused = false" type="text" v-model="pathInput" class="path-input w-full" @change="Load(pathInput)" />
-                </div>
-
-                <div class="path-controls p-0">
-                    <Button icon="pi pi-cog" class="mr-1 p-button-text" @click="Options" v-tooltip.bottom="$t('folder.options')"></Button>
-                    <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
-                </div>
-            </div>
-        </div>
-
-        <div class="folder-browser-window flex unselectable-text">
-            <div class="side-bar col-3">
-                <div v-for="folder in root" :key="folder.name" :class="'side-bar-item pl-2 ' + (folder.selected ? 'bg-primary' : '')" @click="SelectSideBarItem(folder)">
-                    <i :class="folder.icon" style="font-size: 1rem"></i>
-                    <span class="ml-2">{{ folder.name }}</span>
-                </div>
-            </div>
-
-            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length" @contextmenu="Options">
-                <ScrollPanel style="width: 100%; height: 100%">
-                    <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
-                        <div @contextmenu="OnContextMenu($event, index)" :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
-                            <i :class="(folder.directory) ? 'pi pi-folder' : 'pi pi-file'" style="font-size: 1rem"></i>
-                            <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
-                        </div>
+    <div ref="folderbrowsermain" @focus="OnFocus" @blur="OnLoseFocus" tabindex="0">
+        <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :title="$t('folder.browser')" icon="/folder.png" :defaultSize="{width: 850, height: 500}" :onClose="onClose" :onMinimize="onMinimize">
+            <div class="path-bar">
+                <div class="path flex">
+                    <Button icon="pi pi-angle-left" class="mx-1 p-button-text" @click="GoBack"></Button>
+                    <div class="flex-grow-1 p-0 mr-3">
+                        <InputText spellcheck="false" @focus="pathFocused = true" @blur="pathFocused = false" type="text" v-model="pathInput" class="path-input w-full" @change="Load(pathInput)" />
                     </div>
+
+                    <div class="path-controls p-0">
+                        <Button icon="pi pi-cog" class="mr-1 p-button-text" @click="Options" v-tooltip.bottom="$t('folder.options')"></Button>
+                        <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="folder-browser-window flex unselectable-text">
+                <div class="side-bar col-3">
+                    <div v-for="folder in root" :key="folder.name" :class="'side-bar-item pl-2 ' + (folder.selected ? 'bg-primary' : '')" @click="SelectSideBarItem(folder)">
+                        <i :class="folder.icon" style="font-size: 1rem"></i>
+                        <span class="ml-2">{{ folder.name }}</span>
+                    </div>
+                </div>
+
+                <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length" @contextmenu="Options">
+                    <ScrollPanel style="width: 100%; height: 100%">
+                        <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" v-on:dblclick="LoadItem(folder)">
+                            <div @contextmenu="OnContextMenu($event, index)" :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
+                                <i :class="(folder.directory) ? 'pi pi-folder' : 'pi pi-file'" style="font-size: 1rem"></i>
+                                <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
+                            </div>
+                        </div>
+                    </ScrollPanel>
+
+                    <ContextMenu ref="foldermenu" :model="folderContextMenuItems" />
+                    <ContextMenu ref="filemenu" :model="fileContextMenuItems" />
+                    <ContextMenu ref="multimenu" :model="multiFileContextMenuItems" />
+                </div>
+
+                <div class="w-full text-center flex " v-if="loading">
+                    <ProgressSpinner class="h-full" />
+                </div>
+
+                <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error" @contextmenu="Options">
+                    {{ $t('folder.emptyfolder') }}
+                </div>
+
+                <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="error">
+                    {{ error }} . <span class="text-primary cursor-pointer" @click="Load(currentPath)">{{ $t('folder.clear') }}</span>
+                </div>
+            </div>
+
+            <Dialog :header="$t('folder.newfile')" v-model:visible="newFile.visible" class="display-name-dialog" :modal="true">
+                <div class="p-text-secondary">
+                    <InputText :placeholder="$t('folder.filename')" v-model="newFile.name" class="w-full mt-3" />
+
+                    <Checkbox v-model="newFile.directory" :binary="true" class="mt-3" />
+                    <span class="ml-2">{{ $t('folder.directory') }}</span>
+                </div>
+
+                <template #footer>
+                    <div class="flex justify-content-center">
+                        <Button :label="$t('folder.create')" @click="CreateFile" />
+                    </div>
+                </template>
+            </Dialog>
+
+            <Dialog :header="$t('folder.downloading')" v-model:visible="download.visible" class="display-name-dialog" :modal="true">
+                <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(download.items).length">
+                    <template v-for="downloadItem in download.items">
+                        <div  class="my-2" v-if="downloadItem">
+                            <div class="mb-1">{{ downloadItem.name }}</div>
+                            <ProgressBar :value="downloadItem.value" :showValue="false" />
+                        </div>
+                    </template>
                 </ScrollPanel>
 
-                <ContextMenu ref="foldermenu" :model="folderContextMenuItems" />
-                <ContextMenu ref="filemenu" :model="fileContextMenuItems" />
-                <ContextMenu ref="multimenu" :model="multiFileContextMenuItems" />
-            </div>
-
-            <div class="w-full text-center flex " v-if="loading">
-                <ProgressSpinner class="h-full" />
-            </div>
-
-            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="files.length === 0 && !loading && !error" @contextmenu="Options">
-                {{ $t('folder.emptyfolder') }}
-            </div>
-
-            <div class="w-full text-center text-lg mt-5 text-gray-300" v-if="error">
-                {{ error }} . <span class="text-primary cursor-pointer" @click="Load(currentPath)">{{ $t('folder.clear') }}</span>
-            </div>
-        </div>
-
-        <Dialog :header="$t('folder.newfile')" v-model:visible="newFile.visible" class="display-name-dialog" :modal="true">
-            <div class="p-text-secondary">
-                <InputText :placeholder="$t('folder.filename')" v-model="newFile.name" class="w-full mt-3" />
-
-                <Checkbox v-model="newFile.directory" :binary="true" class="mt-3" />
-                <span class="ml-2">{{ $t('folder.directory') }}</span>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-content-center">
-                    <Button :label="$t('folder.create')" @click="CreateFile" />
+                <div class="p-5 text-center text-primary" v-else>
+                    <div class="pi pi-check-circle" style="font-size: 3rem"></div>
+                    <div class="mt-3">{{ $t('folder.downloaded') }}</div>
                 </div>
-            </template>
-        </Dialog>
+            </Dialog>
 
-        <Dialog :header="$t('folder.downloading')" v-model:visible="download.visible" class="display-name-dialog" :modal="true">
-            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(download.items).length">
-                <template v-for="downloadItem in download.items">
-                    <div  class="my-2" v-if="downloadItem">
-                        <div class="mb-1">{{ downloadItem.name }}</div>
-                        <ProgressBar :value="downloadItem.value" :showValue="false" />
+            <Dialog :header="$t('folder.uploading')" v-model:visible="upload.visible" class="display-name-dialog" :modal="true">
+                <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(upload.items).length">
+                    <template v-for="uploadItem in upload.items">
+                        <div  class="my-2" v-if="uploadItem">
+                            <div class="mb-1">{{ uploadItem.name }}</div>
+                            <ProgressBar :value="uploadItem.value" :showValue="false" />
+                        </div>
+                    </template>
+                </ScrollPanel>
+
+                <div class="p-5 text-center text-primary" v-else>
+                    <div class="pi pi-check-circle" style="font-size: 3rem"></div>
+                    <div class="mt-3">{{ $t('folder.uploaded') }}</div>
+                </div>
+            </Dialog>
+
+            <Dialog :header="$t('folder.rename')" v-model:visible="rename.visible" class="display-name-dialog" :modal="true">
+                <div class="p-text-secondary">
+                    <InputText :placeholder="files[rename.index].name" v-model="rename.name" class="w-full mt-3" />
+                </div>
+
+                <template #footer>
+                    <div class="flex justify-content-center">
+                        <Button :label="$t('folder.rename')" @click="Rename" />
                     </div>
                 </template>
-            </ScrollPanel>
+            </Dialog>
 
-            <div class="p-5 text-center text-primary" v-else>
-                <div class="pi pi-check-circle" style="font-size: 3rem"></div>
-                <div class="mt-3">{{ $t('folder.downloaded') }}</div>
-            </div>
-        </Dialog>
+            <Dialog :header="$t('folder.chmod')" v-model:visible="permissions.visible" class="display-name-dialog" :modal="true">
+                <div>
+                    <div :class="'text-center text-lg py-2 px-3 border-round surface-section mb-4 ' + ((selected.length > 1) ? 'text-primary' : '')">
+                        {{ permissions.name}}
+                    </div>
 
-        <Dialog :header="$t('folder.uploading')" v-model:visible="upload.visible" class="display-name-dialog" :modal="true">
-            <ScrollPanel style="width: 350px;  height: 150px; padding: 5px;" v-if="Object.keys(upload.items).length">
-                <template v-for="uploadItem in upload.items">
-                    <div  class="my-2" v-if="uploadItem">
-                        <div class="mb-1">{{ uploadItem.name }}</div>
-                        <ProgressBar :value="uploadItem.value" :showValue="false" />
+                    <table class="text-center mb-3">
+                        <thead>
+                            <tr>
+                                <th> </th>
+                                <th class="px-3 pb-2">{{ $t('folder.owner') }}</th>
+                                <th class="px-3 pb-2">{{ $t('folder.group') }}</th>
+                                <th class="px-3 pb-2">{{ $t('folder.other') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-bold pb-2">{{ $t('folder.read') }}</td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][0]" :binary="true" /></td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][1]" :binary="true" /></td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][2]" :binary="true" /></td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold pb-2">{{ $t('folder.write') }}</td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][0]" :binary="true" /></td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][1]" :binary="true" /></td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][2]" :binary="true" /></td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold pb-2">{{ $t('folder.exec') }}</td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][0]" :binary="true" /></td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][1]" :binary="true" /></td>
+                                <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][2]" :binary="true" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="text-center text-5xl">
+                        {{ permissions.value }}
+                    </div>
+
+                    <div class="text-center text-secondary mt-4">
+                        <Checkbox v-model="permissions.recursive" :binary="true" />
+                        <span class="text-bold ml-2">{{ $t('folder.recursive') }}</span>
+                    </div>
+                </div>
+
+                <template #footer>
+                    <div class="flex justify-content-center">
+                        <Button :label="$t('folder.chmod')" @click="ChangePermissionsConfirm" />
                     </div>
                 </template>
-            </ScrollPanel>
-
-            <div class="p-5 text-center text-primary" v-else>
-                <div class="pi pi-check-circle" style="font-size: 3rem"></div>
-                <div class="mt-3">{{ $t('folder.uploaded') }}</div>
-            </div>
-        </Dialog>
-
-        <Dialog :header="$t('folder.rename')" v-model:visible="rename.visible" class="display-name-dialog" :modal="true">
-            <div class="p-text-secondary">
-                <InputText :placeholder="files[rename.index].name" v-model="rename.name" class="w-full mt-3" />
-            </div>
-
-            <template #footer>
-                <div class="flex justify-content-center">
-                    <Button :label="$t('folder.rename')" @click="Rename" />
-                </div>
-            </template>
-        </Dialog>
-
-        <Dialog :header="$t('folder.chmod')" v-model:visible="permissions.visible" class="display-name-dialog" :modal="true">
-            <div>
-                <div :class="'text-center text-lg py-2 px-3 border-round surface-section mb-4 ' + ((selected.length > 1) ? 'text-primary' : '')">
-                    {{ permissions.name}}
-                </div>
-
-                <table class="text-center mb-3">
-                    <thead>
-                        <tr>
-                            <th> </th>
-                            <th class="px-3 pb-2">{{ $t('folder.owner') }}</th>
-                            <th class="px-3 pb-2">{{ $t('folder.group') }}</th>
-                            <th class="px-3 pb-2">{{ $t('folder.other') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="text-bold pb-2">{{ $t('folder.read') }}</td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][0]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][1]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[0][2]" :binary="true" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold pb-2">{{ $t('folder.write') }}</td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][0]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][1]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[1][2]" :binary="true" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold pb-2">{{ $t('folder.exec') }}</td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][0]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][1]" :binary="true" /></td>
-                            <td class="px-3 pb-2"><Checkbox @change="OnPermissionCheckboxChange" v-model="permissions.items[2][2]" :binary="true" /></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="text-center text-5xl">
-                    {{ permissions.value }}
-                </div>
-
-                <div class="text-center text-secondary mt-4">
-                    <Checkbox v-model="permissions.recursive" :binary="true" />
-                    <span class="text-bold ml-2">{{ $t('folder.recursive') }}</span>
-                </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-content-center">
-                    <Button :label="$t('folder.chmod')" @click="ChangePermissionsConfirm" />
-                </div>
-            </template>
-        </Dialog>
-    </Window>
+            </Dialog>
+        </Window>
+    </div>
 </template>
 
 <script>
@@ -420,7 +422,10 @@ export default {
             copying: 0,
             deleting: 0,
             moving: 0,
-            changingPermissions: 0
+            changingPermissions: 0,
+
+
+            focused: true
         }
     },
 
@@ -428,7 +433,37 @@ export default {
         this.Load(Helpers.GetHomeDirectory())
     },
 
+    activated () {
+        this.RegisterKeyEvents()
+    },
+
+    deactivated () {
+        this.RemoveKeyEvents()
+    },
+
+    beforeDestroy () {
+        this.RemoveKeyEvents()
+    },
+
     methods: {
+        RegisterKeyEvents () {
+            window.addEventListener('keydown', this.OnKeyDown)
+        },
+
+        RemoveKeyEvents () {
+            window.removeEventListener('keydown', this.OnKeyDown)
+        },
+
+        OnFocus(event) {
+            if (event.target === this.$el) {
+                this.focused = true
+            }
+        },
+
+        OnLoseFocus() {
+            this.focused = false
+        },
+
         Load (path) {
             this.loading = true
             this.error = ''
@@ -863,6 +898,8 @@ export default {
             })
 
             Clipboard.Set(this.clipboardData)
+
+            this.$toast.add({severity:'success', summary: this.$t('folder.copysuccess'), life: 3000})
         },
 
         CopyFile (clipBoardData, file) {
@@ -873,6 +910,7 @@ export default {
                 this.copying--
 
                 if (this.copying === 0) {
+                    this.$toast.add({severity:'success', summary: this.$t('folder.pastesuccess'), life: 3000})
                     this.Load(this.currentPath)
                 }
             })
@@ -898,6 +936,7 @@ export default {
             })
 
             Clipboard.Set(this.clipboardData)
+            this.$toast.add({severity:'success', summary: this.$t('folder.cutsuccess'), life: 3000})
         },
 
         CutFile (clipBoardData, file) {
@@ -908,6 +947,7 @@ export default {
                 this.moving--
 
                 if (this.moving === 0) {
+                    this.$toast.add({severity:'success', summary: this.$t('folder.pastesuccess'), life: 3000})
                     this.Load(this.currentPath)
                 }
             })
@@ -1042,6 +1082,24 @@ export default {
 
         IsImage (file) {
             return file.name.match(/\.(jpeg|jpg|gif|png|webp)$/)
+        },
+
+        OnKeyDown (event) {
+            if (! this.focused) return
+
+            if (event.ctrlKey && event.key === 'c') {
+                this.Copy()
+            } else if (event.ctrlKey && event.key === 'x') {
+                this.Cut()
+            } else if (event.ctrlKey && event.key === 'v') {
+                this.Paste()
+            } else if (event.key === 'Delete') {
+                this.DeleteConfirm()
+            } else if (event.key === 'Enter' && this.selected.length === 1) {
+                this.LoadItem(this.files[this.selected[0]])
+            } else if (event.key === 'Escape') {
+                this.selected = []
+            }
         }
     }
 }

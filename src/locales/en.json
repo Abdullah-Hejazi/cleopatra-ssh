@@ -99,7 +99,10 @@
         "openlargefileconfirm": "Open Large File",
         "openlargefileconfirmtext": "The File ( ",
         "openlargefileconfirmtext2": " ) is too large to open in the editor, Are you sure you want to open it ?",
-        "openterminal": "Open Terminal Here"
+        "openterminal": "Open Terminal Here",
+        "copysuccess": "Copy Success",
+        "cutsuccess": "Cut Success",
+        "pastesuccess": "Paste Success"
     },
 
     "editor": {
