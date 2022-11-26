@@ -4,5 +4,6 @@ Instead of typing command in your terminal, you can interact with your SSH serve
 
 It also has a lot of tools such as text editors, image viewer, and a lot of other tools.
 
-- Fix Modal resize issue
+- Fix select file dialog scroll
 - add arrows moving up/down in folder browser
+- fix folder browser error + loading

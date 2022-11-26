@@ -23,6 +23,7 @@
                     </div>
                     <div class="editor flex-grow-1" v-show="!loading">
                         <textarea ref="editor" spellcheck="false" class="text-editor w-full h-full" v-model="text" @keyup="OnKeyUp"></textarea>
+                        <pre ref="editorhighlighter" v-html="textHighlighted" class="text-editor-code unselectable-text"></pre>
                     </div>
                 </div>
             </div>
@@ -65,6 +66,10 @@ import Window from '@/components/windows/Window'
 import FileDialog from '@/components/windows/FileDialog'
 import Modal from '@/components/windows/Modal'
 
+import 'highlight.js/styles/kimbie-dark.css'
+import 'highlight.js/lib/common'
+let highlighter = require('highlight.js')
+
 export default {
     name: 'Editor',
 
@@ -104,6 +109,7 @@ export default {
     data () {
         return {
             text: '',
+            textHighlighted: '',
 
             loading: false,
 
@@ -200,6 +206,8 @@ export default {
             const lineNumbers = this.$el.querySelector('.line-numbers')
 
             lineNumbers.scrollTop = editor.scrollTop
+            this.$refs.editorhighlighter.scrollLeft = editor.scrollLeft
+            this.$refs.editorhighlighter.scrollTop = editor.scrollTop
         },
 
         OnKeyUp (e) {
@@ -283,6 +291,12 @@ export default {
             this.Read(file.path + '/' + file.name)
             this.openDialog = false
         }
+    },
+
+    watch: {
+        text () {
+            this.textHighlighted = highlighter.highlightAuto(this.text).value.replaceAll('\n', '<br>')
+        }
     }
 }
 </script>
@@ -325,14 +339,42 @@ export default {
     }
 
     .text-editor {
-        background-color: #00000049 !important;
-        border-radius: 5px;
+        z-index: 20;
+        position: absolute;
+        top: 91px;
+        left: 44px;
+        background-color: transparent !important;
         border: none;
         font-size: 1rem;
         line-height: 25px;
         white-space: nowrap;
         resize: none;
         scroll-padding: 50px 0 0 50px;
+        color: transparent;
+        caret-color: white;
+        width: calc(100% - 40px) !important;
+        height: calc(100% - 70px) !important;
+        padding-right: 20px;
+        padding-left: 10px;
+    }
+
+    .text-editor-code {
+        z-index: 10;
+        position: absolute;
+        top: 77px;
+        left: 44px;
+        border: none;
+        font-size: 1rem;
+        line-height: 25px;
+        white-space: pre;
+        resize: none;
+        overflow: hidden;
+        scroll-padding: 50px 0 0 50px;
+        width: calc(100% - 40px) !important;
+        height: calc(100% - 70px) !important;
+        padding-bottom: 20px;
+        padding-right: 20px;
+        padding-left: 10px;
     }
 
     .text-editor:focus {

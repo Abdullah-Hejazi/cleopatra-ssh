@@ -165,8 +165,12 @@ export default {
         z-index: 9999999 !important;
     }
 
-    .p-dialog {
+    .p-dialog-mask {
         z-index: 9999999 !important;
+    }
+
+    .p-dropdown-panel {
+        z-index: 99999991 !important;
     }
 
     .p-toast {
