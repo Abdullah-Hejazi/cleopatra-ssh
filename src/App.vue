@@ -165,7 +165,7 @@ export default {
         z-index: 9999999 !important;
     }
 
-    .p-dialog-mask {
+    .p-dialog {
         z-index: 9999999 !important;
     }
 
