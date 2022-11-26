@@ -26,6 +26,7 @@
                         <pre ref="editorhighlighter" v-html="textHighlighted" class="text-editor-code unselectable-text"></pre>
                     </div>
                 </div>
+                <div style="width: 20px;"></div>
             </div>
         </Window>
 
@@ -314,7 +315,7 @@ export default {
         background-color: #0000008a !important;
         border-radius: 5px;
         width: 98%;
-        height: calc(100% - 100px);
+        height: calc(100% - 110px);
     }
 
     .file-name {
@@ -349,11 +350,10 @@ export default {
         line-height: 25px;
         white-space: nowrap;
         resize: none;
-        scroll-padding: 50px 0 0 50px;
         color: transparent;
         caret-color: white;
-        width: calc(100% - 40px) !important;
-        height: calc(100% - 70px) !important;
+        width: calc(100% - 60px) !important;
+        height: calc(100% - 93px) !important;
         padding-right: 20px;
         padding-left: 10px;
     }
@@ -369,10 +369,8 @@ export default {
         white-space: pre;
         resize: none;
         overflow: hidden;
-        scroll-padding: 50px 0 0 50px;
-        width: calc(100% - 40px) !important;
-        height: calc(100% - 70px) !important;
-        padding-bottom: 20px;
+        width: calc(100% - 60px) !important;
+        height: calc(100% - 113px) !important;
         padding-right: 20px;
         padding-left: 10px;
     }
