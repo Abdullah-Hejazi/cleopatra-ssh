@@ -22,7 +22,7 @@
                         <div v-for="_, index in text.split('\n')" :key="index" class="line-number">{{ index + 1}}</div>
                     </div>
                     <div class="editor flex-grow-1" v-show="!loading">
-                        <textarea ref="editor" spellcheck="false" class="text-editor w-full h-full" v-model="text" @keyup="OnKeyUp"></textarea>
+                        <textarea ref="editor" spellcheck="false" class="text-editor w-full h-full" v-model="text" @keyup="OnKeyUp" @keydown="OnKeyDown"></textarea>
                         <pre ref="editorhighlighter" v-html="textHighlighted" class="text-editor-code unselectable-text"></pre>
                     </div>
                 </div>
@@ -143,7 +143,12 @@ export default {
                 fileDialog: false
             },
 
-            openDialog: false
+            openDialog: false,
+
+            tabTracker: {
+                tab: false,
+                index: 0
+            }
         }
     },
 
@@ -203,6 +208,7 @@ export default {
         },
 
         OnScroll (e) {
+            console.log('here')
             const editor = this.$refs.editor
             const lineNumbers = this.$el.querySelector('.line-numbers')
 
@@ -216,6 +222,23 @@ export default {
 
             if (e.ctrlKey && e.key === 's') {
                 this.Save()
+            }
+        },
+
+        OnKeyDown (e) {
+            if (e.key == 'Tab') {
+                e.preventDefault()
+
+                const start = e.target.selectionStart
+                const end = e.target.selectionEnd
+                console.log(start)
+
+                this.text = this.text.substring(0, start) + '\t' + this.text.substring(end)
+
+                this.tabTracker = {
+                    tab: true,
+                    index: start
+                }
             }
         },
 
@@ -296,7 +319,11 @@ export default {
 
     watch: {
         text () {
-            this.textHighlighted = highlighter.highlightAuto(this.text).value.replaceAll('\n', '<br>')
+            this.textHighlighted = highlighter.highlightAuto(this.text).value.replaceAll('\n', '<br>') + '<br>'
+            if (this.tabTracker.tab) {
+                this.$refs.editor.setSelectionRange(this.tabTracker.index + 1, this.tabTracker.index + 1)
+                this.tabTracker.tab = false
+            }
         }
     }
 }
