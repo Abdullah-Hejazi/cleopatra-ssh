@@ -133,7 +133,9 @@
         "error": "Error Loading File: ",
         "name": "File Name",
         "close": "Unsaved Changes",
-        "closeconfirm": "You have unsaved changes, are you sure you want to close ?"
+        "closeconfirm": "You have unsaved changes, are you sure you want to close ?",
+        "disablehighlighting": "Disable Syntax Highlighting",
+        "enablehighlighting": "Enable Syntax Highlighting"
     },
 
     "image": {

@@ -12,7 +12,7 @@
                 </div>
             </div>
 
-            <div class="flex justify-content-center h-full">
+            <div class="px-2 h-full">
                 <div class="editor-container flex" @contextmenu="Options">
                     <div class="w-full text-center flex " v-if="loading">
                         <ProgressSpinner class="h-full" />
@@ -111,6 +111,9 @@ export default {
         return {
             text: '',
             textHighlighted: '',
+            highlight: true,
+            language: 'text',
+            debounceTimer: false,
 
             loading: false,
 
@@ -131,6 +134,11 @@ export default {
                     label: this.$t('editor.saveas'),
                     icon: 'pi pi-clone',
                     command: this.SaveAsDialog
+                },
+                {
+                    label: this.$t('editor.disablehighlighting'),
+                    icon: 'pi pi-hashtag',
+                    command: this.ToggleHighlighting
                 }
             ],
 
@@ -162,6 +170,7 @@ export default {
 
     beforeDestroy () {
         this.$refs.editor.removeEventListener('scroll', this.OnScroll)
+        clearInterval(this.debounceTimer)
     },
 
     methods: {
@@ -172,6 +181,7 @@ export default {
             SSHClient.ReadFile(path).then((result) => {
                 this.currentFile = path
                 this.text = result
+                this.language = highlighter.highlightAuto(this.text).language
             }).catch((err) => {
                 this.currentFile = ''
                 this.$toast.add({ severity: 'error', summary: this.$t('editor.error') + path, detail: err, life: 3000 })
@@ -208,7 +218,6 @@ export default {
         },
 
         OnScroll (e) {
-            console.log('here')
             const editor = this.$refs.editor
             const lineNumbers = this.$el.querySelector('.line-numbers')
 
@@ -231,14 +240,11 @@ export default {
 
                 const start = e.target.selectionStart
                 const end = e.target.selectionEnd
-                console.log(start)
 
                 this.text = this.text.substring(0, start) + '\t' + this.text.substring(end)
 
-                this.tabTracker = {
-                    tab: true,
-                    index: start
-                }
+                e.target.value = this.text
+                e.target.selectionStart = e.target.selectionEnd = start + 1
             }
         },
 
@@ -314,16 +320,42 @@ export default {
         OpenFile (file) {
             this.Read(file.path + '/' + file.name)
             this.openDialog = false
+        },
+
+        ToggleHighlighting () {
+            this.highlight = ! this.highlight
+            this.optionsContextMenuItems[3].label = this.$t('editor.' + (this.highlight ? 'disable' : 'enable') + 'highlighting')
+            this.ChangeHighlighting()
+        },
+
+        ChangeHighlighting () {
+            if (this.highlight) {
+               this.textHighlighted = highlighter.highlight(this.text, {language: this.language ?? 'text'}).value.replaceAll('\n', '<br>') + '<br>'
+            } else {
+                this.textHighlighted = this.text
+            }
+        },
+
+        CheckHighlighting () {
+            this.CheckLanguage()
+            this.ChangeHighlighting()
+        },
+
+        CheckLanguage () {
+            if (this.debounceTimer) {
+                clearTimeout(this.debounceTimer)
+            }
+
+            this.debounceTimer = setTimeout(() => {
+                this.language = highlighter.highlightAuto(this.text).language
+                this.ChangeHighlighting()
+            }, 1000)
         }
     },
 
     watch: {
         text () {
-            this.textHighlighted = highlighter.highlightAuto(this.text).value.replaceAll('\n', '<br>') + '<br>'
-            if (this.tabTracker.tab) {
-                this.$refs.editor.setSelectionRange(this.tabTracker.index + 1, this.tabTracker.index + 1)
-                this.tabTracker.tab = false
-            }
+            this.CheckHighlighting()
         }
     }
 }
@@ -341,7 +373,6 @@ export default {
     .editor-container {
         background-color: #0000008a !important;
         border-radius: 5px;
-        width: 98%;
         height: calc(100% - 110px);
     }
 
@@ -379,10 +410,11 @@ export default {
         resize: none;
         color: transparent;
         caret-color: white;
-        width: calc(100% - 60px) !important;
-        height: calc(100% - 93px) !important;
+        width: calc(100% - 50px) !important;
+        height: calc(100% - 95px) !important;
         padding-right: 20px;
         padding-left: 10px;
+        overflow-x: scroll;
     }
 
     .text-editor-code {
@@ -396,8 +428,8 @@ export default {
         white-space: pre;
         resize: none;
         overflow: hidden;
-        width: calc(100% - 60px) !important;
-        height: calc(100% - 113px) !important;
+        width: calc(100% - 50px) !important;
+        height: calc(100% - 115px) !important;
         padding-right: 20px;
         padding-left: 10px;
     }
@@ -411,24 +443,17 @@ export default {
         border-radius: 5px;
     }
 
-    ::-webkit-scrollbar {
-        margin-top: 50px;
+    textarea::-webkit-scrollbar {
         width: 10px;
+        height: 10px;
+    }
+    
+    textarea::-webkit-scrollbar-thumb {
+        background-color: #7c7c7c;
+        border-radius: 10px;
     }
 
-    ::-webkit-scrollbar-track {
-        background: #303030; 
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: rgb(87, 87, 87); 
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #555; 
-    }
-
-    ::-webkit-resizer {
-        background-color: transparent !important;
+    textarea::-webkit-scrollbar-corner {
+        background-color: transparent;
     }
 </style>
