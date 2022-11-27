@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Window :noMaximize="true" :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="onClose" :onMinimize="onMinimize" :title="$t('general.Settings')" icon="/settings.png" :defaultSize="{width: 450, height: 280}">
+        <Window defaultLocation="center" :noMaximize="true" :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="onClose" :onMinimize="onMinimize" :title="$t('general.Settings')" icon="/settings.png" :defaultSize="{width: 450, height: 280}">
             <div class="p-3">
                 <div class="text-lg text-center"> {{ $t('desktop.changebackground')}} </div>
                 <div class="mt-2 flex">

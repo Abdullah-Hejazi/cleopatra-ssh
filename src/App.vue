@@ -1,5 +1,6 @@
 <template>
     <div>
+        <link rel="stylesheet" href="/primeicons.css" />
         <ConfirmDialog />
         <Toast position="bottom-left" />
 
