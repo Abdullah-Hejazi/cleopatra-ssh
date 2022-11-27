@@ -1215,7 +1215,7 @@ export default {
         },
 
         IsImage (file) {
-            return file.name.match(/\.(jpeg|jpg|gif|png|webp)$/)
+            return file.name.toLowerCase().match(/\.(jpeg|jpg|gif|png|webp)$/)
         },
 
         OnKeyDown (event) {
