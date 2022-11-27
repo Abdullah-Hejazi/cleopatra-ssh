@@ -17,7 +17,7 @@
                 </div>
             </div>
 
-            <div class="main-content-list col-9 mr-2" v-if="!loading && !error && files.length">
+            <div class="col-9 mr-2" v-if="!loading && !error && files.length">
                 <ScrollPanel style="width: 100%; height: 100%">
                     <div v-for="folder, index in files" :key="folder.name" v-tooltip.bottom="folder.name" @click="SelectItem(index)" @keyup.enter="LoadItem(folder)" v-on:dblclick="LoadItem(folder)">
                         <div :class="'main-content-item-list ' + (IsSelected(index) ? 'bg-primary' : '')" >
@@ -25,6 +25,7 @@
                             <span class="ml-2 main-content-item-text-list">{{ folder.name }}</span>
                         </div>
                     </div>
+                    <div style="height: 15px;"></div>
                 </ScrollPanel>
             </div>
 

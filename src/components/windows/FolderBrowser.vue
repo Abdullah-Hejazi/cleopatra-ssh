@@ -39,7 +39,7 @@
                     <ContextMenu ref="multimenu" :model="multiFileContextMenuItems" />
                 </div>
 
-                <div class="w-full text-center flex " v-if="loading">
+                <div class="w-full text-center flex " v-if="loading && !error">
                     <ProgressSpinner class="h-full" />
                 </div>
 
