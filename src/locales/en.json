@@ -18,7 +18,8 @@
         "Terminal": "Terminal",
         "ImageViewer": "Image Viewer",
         "minimizedprocesses": "Minimized Applications",
-        "noprocesses": "No Active Processes"
+        "noprocesses": "No Active Processes",
+        "Settings": "Settings"
     },
 
     "login": {

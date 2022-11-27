@@ -18,7 +18,8 @@
         "Terminal": "وحدة الأوامر",
         "ImageViewer": "عارض الصور",
         "minimizedprocesses": "البرامج الخفية",
-        "noprocesses": "لا يوجد برامج"
+        "noprocesses": "لا يوجد برامج",
+        "Settings": "الإعدادات"
     },
 
     "login": {

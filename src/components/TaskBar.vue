@@ -42,6 +42,11 @@ export default {
                     name: this.$t('general.ImageViewer'),
                     icon: '/imageviewer.png',
                     process: 'ImageViewer'
+                },
+                {
+                    name: this.$t('general.Settings'),
+                    icon: '/settings.png',
+                    process: 'Settings'
                 }
             ]
         }
