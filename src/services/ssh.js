@@ -70,7 +70,7 @@ export default {
 	},
 
 	ListNested: async (file) => {
-		return await sshSession.exec('find ' + file + ' -printf "%y %P\n"')
+		return await sshSession.exec('find "' + file + '" -printf "%y %P\n"')
 	},
 
 	ReadFile: async (file, encoding='utf8') => {
@@ -80,15 +80,15 @@ export default {
 	},
 
 	CreateFile: async (file) => {
-		return sshSession.exec('touch ' + file)
+		return sshSession.exec('touch "' + file + '"')
 	},
 
 	FileExists: async (file) => {
-		return sshSession.exec('test -e ' + file + ' && echo 1 || echo 0')
+		return sshSession.exec('test -e "' + file + '" && echo 1 || echo 0')
 	},
 
 	CreateDirectory: async (file) => {
-		return sshSession.exec('mkdir ' + file)
+		return sshSession.exec('mkdir "' + file + '"')
 	},
 
 	Download: async (remotePath, localPath, options) => {
@@ -100,22 +100,22 @@ export default {
 	},
 
 	Move: async (oldPath, newPath) => {
-		return sshSession.exec('mv ' + oldPath + ' ' + newPath)
+		return sshSession.exec('mv "' + oldPath + '" "' + newPath + '"')
 	},
 
 	Copy: async (oldPath, newPath, directory) => {
 		if (directory)
-			return sshSession.exec('cp -r ' + oldPath + ' ' + newPath)
+			return sshSession.exec('cp -r "' + oldPath + '" "' + newPath + '"')
 			
-		return sshSession.exec('cp ' + oldPath + ' ' + newPath)
+		return sshSession.exec('cp "' + oldPath + '" "' + newPath + '"')
 	},
 
 	Delete: async (file) => {
-		return sshSession.exec('rm -rdf ' + file)
+		return sshSession.exec('rm -rdf "' + file + '"')
 	},
 
 	ChangePermissions: async (file, permissions, recursive) => {
-		return sshSession.exec('chmod ' + (recursive ? '-R ' : '') + permissions + ' ' + file)
+		return sshSession.exec('chmod ' + (recursive ? '-R ' : '') + permissions + ' "' + file + '"')
 	},
 
 	WriteFile: async (file, content) => {
