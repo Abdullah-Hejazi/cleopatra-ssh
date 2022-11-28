@@ -1100,14 +1100,14 @@ export default {
                 return
             }
 
-            if (clipBoardData.action === 'copy') {
+            if (clipBoardData.type === 'copy') {
                 this.copying = clipBoardData.files.length
             } else {
                 this.moving = clipBoardData.files.length
             }
 
             clipBoardData.files.forEach((file) => {
-                if (clipBoardData.action === 'copy') {
+                if (clipBoardData.type === 'copy') {
                     this.CopyFile(clipBoardData, file)
                 } else {
                     this.CutFile(clipBoardData, file)
