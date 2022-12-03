@@ -32,3 +32,5 @@ coverage
 
 .env
 .vscode
+
+/release

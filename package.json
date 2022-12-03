@@ -2,7 +2,11 @@
     "name": "cleopatra-ssh",
     "version": "0.0.0",
     "description": "SSH Client",
-    "author": "Abdullah Hejazi",
+    "author": {
+        "name" : "Abdullah Hejazi",
+        "email" : "a.m.a.hejazi@gmail.com",
+        "url" : "https://hejazi.tech"
+    },
     "icon": "favicon.ico",
     "scripts": {
         "build": "vite build",
