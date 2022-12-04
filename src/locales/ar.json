@@ -40,7 +40,8 @@
         "typePassword": "أدخل كلمة المرور",
         "keypath": "مسار ملف المفتاح",
         "passphrase": "كلمة مرور المفتاح",
-        "authentication": " مصادقة "
+        "authentication": " مصادقة ",
+        "editaccount": "تعديل الحساب"
     },
 
     "folder": {

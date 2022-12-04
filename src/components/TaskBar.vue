@@ -1,7 +1,7 @@
 <template>
     <div class="taskbar flex">
         <IconItem :name="$t('general.processes')" icon="/apps.png" width="48" @click="onActiveApps" />
-        <IconItem v-for="item in taskbarItems" :key="item.name" :name="item.name" :icon="item.icon" width="48" @click="onOpen(item.process)" />
+        <IconItem v-for="item in taskbarItems" :key="item.process" :name="GetProcessName(item.process)" :icon="item.icon" width="48" @click="onOpen(item.process)" />
     </div>
 </template>
 
@@ -24,31 +24,32 @@ export default {
         return {
             taskbarItems: [
                 {
-                    name: this.$t('folder.browser'),
                     icon: '/folder.png',
                     process: 'FolderBrowser'
                 },
                 {
-                    name: this.$t('general.Terminal'),
                     icon: '/terminal.png',
                     process: 'Terminal'
                 },
                 {
-                    name: this.$t('editor.title'),
                     icon: '/texteditor.png',
                     process: 'Editor'
                 },
                 {
-                    name: this.$t('general.ImageViewer'),
                     icon: '/imageviewer.png',
                     process: 'ImageViewer'
                 },
                 {
-                    name: this.$t('general.Settings'),
                     icon: '/settings.png',
                     process: 'Settings'
                 }
             ]
+        }
+    },
+
+    methods: {
+        GetProcessName(name) {
+            return this.$t('general.' + name)
         }
     }
 }

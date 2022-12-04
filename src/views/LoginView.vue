@@ -78,7 +78,7 @@
                             <span class="p-inputgroup-addon">
                                 <i class="pi pi-key"></i>
                             </span>
-                            <InputText :placeholder="$t('login.passphrase')" v-model="loginData.passPhrase" />
+                            <InputText type="password" :placeholder="$t('login.passphrase')" v-model="loginData.passPhrase" />
                         </div>
                     </div>
                 </div>
@@ -115,6 +115,7 @@
                         :index="index"
                         :remove="RemoveAccount"
                         :load="SelectAccount"
+                        :edit="EditAccount"
                     />
 
                     <div class="text-center text-600 mb-3" v-if="savedAccounts.length == 0">
@@ -302,6 +303,24 @@ export default {
             }
             
             this.selectedAccount = true
+        },
+
+        EditAccount (index, account) {
+            let data = {
+                host: account.host == '' ? 'localhost' : account.host,
+                port: account.port == null ? 22 : account.port,
+                authType: account.authType,
+                username: account.username,
+                displayName: account.displayName,
+                savePassword: account.savePassword ?? false,
+                privateKey: account.privateKey,
+                password: account.password,
+                passPhrase: account.passPhrase
+            }
+
+            this.savedAccounts[index] = data
+
+            localStorage.setItem('savedAccounts', JSON.stringify(this.savedAccounts))
         },
 
         SelectPrivateKeyPath () {

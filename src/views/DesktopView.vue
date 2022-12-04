@@ -70,7 +70,7 @@ export default {
                 Settings: '/settings.png'
             },
 
-            currentZIndex: 1500,
+            currentZIndex: 200,
 
             refreshIndex: 0, // Used to refresh processes intentionally (e.g when a folder has a new file, it requires all other folders to refresh)
 

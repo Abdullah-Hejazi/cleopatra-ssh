@@ -158,24 +158,21 @@ export default {
         user-select: text;
     }
 
-    .p-contextmenu {
-        z-index: 9999999 !important;
-    }
 
     .p-tooltip {
         z-index: 9999999 !important;
     }
 
-    .p-dialog-mask {
+    .p-contextmenu {
+        z-index: 999999 !important;
+    }
+
+    .p-toast {
         z-index: 9999999 !important;
     }
 
     .p-dropdown-panel {
         z-index: 99999991 !important;
-    }
-
-    .p-toast {
-        z-index: 9999999 !important;
     }
 
 </style>

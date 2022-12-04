@@ -40,7 +40,8 @@
         "typePassword": "Type the password",
         "keypath": "Key Path",
         "passphrase": "PassPhrase",
-        "authentication": " Authentication "
+        "authentication": " Authentication ",
+        "editaccount": "Edit Account"
     },
 
     "folder": {
