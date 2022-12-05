@@ -7,7 +7,7 @@
         "email" : "a.m.a.hejazi@gmail.com",
         "url" : "https://hejazi.tech"
     },
-    "icon": "favicon.ico",
+    "icon": "icon.png",
     "scripts": {
         "build": "vite build",
         "test:unit": "vitest --environment jsdom",

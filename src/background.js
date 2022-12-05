@@ -23,7 +23,7 @@ function createWindow() {
         minWidth: 800,
         minHeight: 600,
         frame: process.env.WEBPACK_DEV_SERVER_URL,
-        icon: __dirname + '/favicon.ico',
+        icon: __dirname + '/icon.png',
         title: 'Cleopatra SSH',
         webPreferences: {
 

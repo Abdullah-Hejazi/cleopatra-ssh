@@ -21,3 +21,8 @@ npm install
 
 npm run electron:build
 ```
+
+TODO:
+- [ ] refactor editor
+- [ ] Add lazy loading for folder browser
+- [ ] 
