@@ -3,9 +3,9 @@
     "version": "0.0.0",
     "description": "SSH Client",
     "author": {
-        "name" : "Abdullah Hejazi",
-        "email" : "a.m.a.hejazi@gmail.com",
-        "url" : "https://hejazi.tech"
+        "name": "Abdullah Hejazi",
+        "email": "a.m.a.hejazi@gmail.com",
+        "url": "https://hejazi.tech"
     },
     "icon": "icon.png",
     "scripts": {
@@ -32,7 +32,11 @@
         "vue": "^3.2.31",
         "vue-i18n": "^9.1.9",
         "vue-router": "^4.0.14",
-        "vuex": "^4.0.2"
+        "vuex": "^4.0.2",
+        "xterm": "^5.0.0",
+        "xterm-addon-fit": "^0.6.0",
+        "xterm-addon-unicode11": "^0.4.0",
+        "xterm-addon-web-links": "^0.7.0"
     },
     "devDependencies": {
         "@rushstack/eslint-patch": "^1.1.0",
