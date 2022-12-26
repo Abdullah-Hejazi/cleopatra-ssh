@@ -4,7 +4,7 @@ module.exports = {
             nodeIntegration: true,
             externals:['ssh2-promise'],
             builderOptions: {
-                icon: 'build/icon.png',
+                icon: 'icons/icon.png',
                 win: {
                     target: 'portable',
                     asar: true,
@@ -26,7 +26,8 @@ module.exports = {
                     icon: 'build/256x256.png',
                 },
                 directories:{
-                    buildResources: "build"
+                    buildResources: "build",
+                    output: "dist"
                 }
               }
         }
