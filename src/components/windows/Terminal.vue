@@ -99,8 +99,9 @@ export default {
 
         term.open(terminal)
 
-        term.onKey((event) => {
-            if (event.key === '\r') {
+        term.onKey(async (event) => {
+            if (event.domEvent.code === 'Enter') {
+                term.write('\r')
                 this.WriteBuffer()
                 return
             } else if (event.domEvent.code === 'Backspace') {
@@ -108,13 +109,26 @@ export default {
                     this.command = this.command.slice(0, -1)
                     term.write('\b \b')
                 }
+            } else if (event.domEvent.code === 'Tab') {
+                //
+
+            } else if (event.key === '\u0003') {
+                term.write('^C\r')
+                this.command = ''
+                this.WriteBuffer()
+                return;
+
+            } else if (event.key === '\u0016') {
+                const text = await navigator.clipboard.readText()
+                this.command += text
+                term.write(text)
+                return;
+
             } else {
                 this.command += event.key
                 term.write(event.key)
             }
         })
-
-        console.log(term)
     },
 
     methods: {
