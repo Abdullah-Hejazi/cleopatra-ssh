@@ -1,15 +1,7 @@
 <template>
     <div>
         <Window :onZIndexChange="onZIndexChange" :zIndex="zIndex" :onClose="CloseTerminal" :onMinimize="onMinimize" :title="$t('general.Terminal')" icon="/terminal.png" :defaultSize="{width: 700, height: 400}">
-            <div class="terminal flex flex-column selectable-text" @focus="TerminalFocus" ref="terminalcontainer" @contextmenu="OptionsMenu">
-                <div>
-                    <pre class="terminal-line flex m-0 my-1" v-for="line, index in lines.slice(0, lines.length - 1)" :key="index">{{line}}<span class="flex-grow-1" @click="TerminalFocus"><input v-if="index+1 === lines.length" type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
-                    <pre class="terminal-line flex m-0 my-1">{{lines[lines.length-1]}}<span class="flex-grow-1" @click="TerminalFocus"><input type="text" class="terminal-input w-full" v-model="command" @keyup.enter="WriteBuffer" ref="terminalinput"></span></pre>
-                </div>
-                <div @click="TerminalFocus" class="flex-grow-1"></div>
-            </div>
-
-            <ContextMenu ref="optionsmenu" :model="optionsContextMenuItems" />
+            <div ref="terminal" id="terminal"></div>
         </Window>
     </div>
 </template>
@@ -19,6 +11,18 @@ import Window from '@/components/windows/Window'
 
 import SSHClient from '@/services/ssh'
 import Helpers from '@/services/helpers'
+
+import 'xterm/css/xterm.css'
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
+import { WebLinksAddon } from 'xterm-addon-web-links'
+import { Unicode11Addon } from 'xterm-addon-unicode11'
+
+let term = new Terminal({
+    allowProposedApi: true
+})
+
+let fitAddon = new FitAddon()
 
 export default {
     name: 'Terminal',
@@ -81,6 +85,50 @@ export default {
         } else {
             this.Load(Helpers.GetHomeDirectory())
         }
+
+        let terminal = this.$refs.terminal
+
+        term.loadAddon(fitAddon)
+
+        term.loadAddon(new WebLinksAddon())
+        term.loadAddon(new Unicode11Addon())
+
+        fitAddon.fit()
+
+        term.unicode.activeVersion = '11'
+
+        term.open(terminal)
+
+        term.onKey(async (event) => {
+            if (event.domEvent.code === 'Enter') {
+                term.write('\r')
+                this.WriteBuffer()
+                return
+            } else if (event.domEvent.code === 'Backspace') {
+                if (this.command) {
+                    this.command = this.command.slice(0, -1)
+                    term.write('\b \b')
+                }
+            } else if (event.domEvent.code === 'Tab') {
+                //
+
+            } else if (event.key === '\u0003') {
+                term.write('^C\r')
+                this.command = ''
+                this.WriteBuffer()
+                return;
+
+            } else if (event.key === '\u0016') {
+                const text = await navigator.clipboard.readText()
+                this.command += text
+                term.write(text)
+                return;
+
+            } else {
+                this.command += event.key
+                term.write(event.key)
+            }
+        })
     },
 
     methods: {
@@ -95,25 +143,15 @@ export default {
         },
 
         RecieveBuffer (buffer) {
-            const regex = /(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/g
-
-            buffer.toString().match(regex)?.forEach((match) => {
-                buffer = buffer.toString().replace(match, '')
-            })
-
-            let line = buffer.toString().replaceAll('\u0000', '')
-
-            this.lines.push(...line.split('\r\n'))
+            term.write(buffer)
+            this.command = ''
+            return
         },
 
         WriteBuffer () {
             if (! this.socket) return
 
             if (this.command) {
-                if (this.command === 'clear') {
-                    this.lines = []
-                }
-
                 this.socket.write(this.command + '\r')
                 this.command = ''
                 return
@@ -126,69 +164,7 @@ export default {
         CloseTerminal () {
             this.socket.close()
             this.onClose()
-        },
-
-        TerminalFocus () {
-            if (this.$refs.terminalinput) {
-                this.$refs.terminalinput.focus()
-
-                this.$refs.terminalcontainer.scrollTo(0, this.$refs.terminalcontainer.scrollHeight)
-            }
-        },
-
-        OptionsMenu (event) {
-            this.$refs.optionsmenu.show(event)
-        },
-
-        Copy () {
-            const selection = window.getSelection()
-
-            navigator.clipboard.writeText(selection.toString())
-        },
-
-        Paste () {
-            navigator.clipboard.readText().then((text) => {
-                this.command += text
-            })
-        }
-    },
-
-    watch: {
-        lines: {
-            handler () {
-                this.$nextTick(() => {
-                    this.$refs.terminalcontainer.scrollTo(0, this.$refs.terminalcontainer.scrollHeight)
-                })
-            },
-            deep: true
         }
     }
 }
 </script>
-
-<style scoped>
-    .terminal {
-        background-color: #000000a1 !important;
-        border-radius: 5px;
-        height: calc(100% - 40px) !important;
-        height: calc(100% - 100px);
-        padding: 10px;
-
-        overflow: auto;
-    }
-
-    .terminal-line {
-        word-wrap: break-word;
-    }
-
-    .terminal-input {
-        background-color: #00000000 !important;
-        border: none;
-        font-family: monospace;
-        white-space: pre;
-    }
-
-    .terminal-input:focus {
-        outline: none;
-    }
-</style>
