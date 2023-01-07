@@ -18,12 +18,6 @@ import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
 import { Unicode11Addon } from 'xterm-addon-unicode11'
 
-let term = new Terminal({
-    allowProposedApi: true
-})
-
-let fitAddon = new FitAddon()
-
 export default {
     name: 'Terminal',
 
@@ -61,7 +55,7 @@ export default {
     data () {
         return {
             socket: null,
-            lines: [],
+            term: null,
             command: '',
 
             optionsContextMenuItems: [
@@ -86,34 +80,29 @@ export default {
             this.Load(Helpers.GetHomeDirectory())
         }
 
+        this.term = new Terminal({
+            allowProposedApi: true
+        })
+
         let terminal = this.$refs.terminal
 
-        term.loadAddon(fitAddon)
+        this.term.open(terminal)
 
-        term.loadAddon(new WebLinksAddon())
-        term.loadAddon(new Unicode11Addon())
-
-        fitAddon.fit()
-
-        term.unicode.activeVersion = '11'
-
-        term.open(terminal)
-
-        term.onKey(async (event) => {
+        this.term.onKey(async (event) => {
             if (event.domEvent.code === 'Enter') {
-                term.write('\r')
+                this.term.write('\r')
                 this.WriteBuffer()
                 return
             } else if (event.domEvent.code === 'Backspace') {
                 if (this.command) {
                     this.command = this.command.slice(0, -1)
-                    term.write('\b \b')
+                    this.term.write('\b \b')
                 }
             } else if (event.domEvent.code === 'Tab') {
                 //
 
             } else if (event.key === '\u0003') {
-                term.write('^C\r')
+                this.term.write('^C\r')
                 this.command = ''
                 this.WriteBuffer()
                 return;
@@ -121,14 +110,18 @@ export default {
             } else if (event.key === '\u0016') {
                 const text = await navigator.clipboard.readText()
                 this.command += text
-                term.write(text)
+                this.term.write(text)
                 return;
 
             } else {
                 this.command += event.key
-                term.write(event.key)
+                this.term.write(event.key)
             }
         })
+    },
+
+    unmounted () {
+        this.term.dispose()
     },
 
     methods: {
@@ -143,7 +136,7 @@ export default {
         },
 
         RecieveBuffer (buffer) {
-            term.write(buffer)
+            this.term.write(buffer)
             this.command = ''
             return
         },
